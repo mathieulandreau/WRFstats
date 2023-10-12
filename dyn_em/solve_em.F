@@ -4831,6 +4831,11 @@ BENCH_END(bc_2d_tim)
                  &   grid%u_tend_damp_mean,grid%v_tend_damp_mean,grid%w_tend_damp_mean,                     &
                  &   grid%rhod_mean,grid%mut_mean,grid%z_mean,grid%dph_x_mean,grid%dph_y_mean                )
             CALL wrf_debug(200,'In solve_em, after zero_avgflx call')
+
+            CALL wrf_debug(200,'In solve_em, before zero_statistics call')
+            CALL zero_statistics(grid, grid%output_stats,        &
+                 &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), k_start    , k_end)
+            CALL wrf_debug(200,'In solve_em, after zero_statistics call')
          ENDDO
    !$OMP END PARALLEL DO
       ENDIF
