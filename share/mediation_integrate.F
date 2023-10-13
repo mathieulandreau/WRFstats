@@ -415,7 +415,7 @@ END SUBROUTINE med_last_ad_solve_io
 
 SUBROUTINE med_after_solve_io ( grid , config_flags )
   ! Driver layer
-   USE module_domain    , ONLY : domain
+   USE module_domain    , ONLY : domain, get_ijk_from_grid
    USE module_timing
    USE module_configure , ONLY : grid_config_rec_type
    USE module_statistics, ONLY : upd_statistics
