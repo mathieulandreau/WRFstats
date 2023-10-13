@@ -68,8 +68,10 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 #endif
 
 #if (DA_CORE != 1)
-   CALL calc_ts_locations( grid )
-   CALL calc_track_locations( grid )
+   IF ( grid%itimestep .EQ. 0 ) THEN
+      CALL calc_ts_locations( grid )
+      CALL calc_track_locations( grid )
+   END IF
 #endif
 
 END SUBROUTINE start_domain
