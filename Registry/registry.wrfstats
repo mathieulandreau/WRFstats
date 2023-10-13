@@ -1,43 +1,46 @@
-# WRFlux
+# WRFstats
 
-# temperature related variables are based on dry theta if output_dry_theta_fluxes=.true. or use_theta_m=0.
+# temperature related variables are based on dry theta if output_dry_theta_fluxes=.true.
+
+# Counter 
+state   integer stats_count  -      dyn_em     -    -    r     "stats_count"  "Counter for time-averaged quantities"  ""
 
 # Average values
-state   real    mut_avg           ij     dyn_em            1               -               h{24} "MUT_AVG"            "time-avg. dry air mass in column"  "Pa"
-state   real    z_avg             ikj    dyn_em            1               Z               h{24} "Z_AVG"              "time-avg. geopotential height"  "m"
-state   real    u_avg             ikj    dyn_em            1               X               h{24} "U_AVG"              "time-avg. x-wind component"  "m s-1"
-state   real    v_avg             ikj    dyn_em            1               Y               h{24} "V_AVG"              "time-avg. y-wind component"  "m s-1"
-state   real    w_avg             ikj    dyn_em            1               Z               h{24} "W_AVG"              "time-avg. z-wind component"   "m s-1"
-state   real    t_avg             ikj    dyn_em            1               -               h{24} "T_AVG"              "time-avg. dry/moist potential temperature perturbation (from T0=300 K)" "K"
-state   real    q_avg             ikj    dyn_em            1               -               h{24} "Q_AVG"              "time-avg. water vapor mixing ratio" ""
+state   real    mut_avg      ij     dyn_em     1    -    h{24} "MUT_AVG"      "time-avg. dry air mass in column"  "Pa"
+state   real    z_avg        ikj    dyn_em     1    Z    h{24} "Z_AVG"        "time-avg. geopotential height"  "m"
+state   real    u_avg        ikj    dyn_em     1    X    h{24} "U_AVG"        "time-avg. x-wind component"  "m s-1"
+state   real    v_avg        ikj    dyn_em     1    Y    h{24} "V_AVG"        "time-avg. y-wind component"  "m s-1"
+state   real    w_avg        ikj    dyn_em     1    Z    h{24} "W_AVG"        "time-avg. z-wind component"   "m s-1"
+state   real    t_avg        ikj    dyn_em     1    -    h{24} "T_AVG"        "time-avg. dry/moist potential temperature perturbation (from T0=300 K)" "K"
+state   real    q_avg        ikj    dyn_em     1    -    h{24} "Q_AVG"        "time-avg. water vapor mixing ratio" ""
 
 # 2nd order statistics
-state   real    u2_avg             ikj    dyn_em            1               X               h{24} "U2_AVG"              "time-avg. squared x-wind component"  "m2 s-2"
-state   real    uv_avg             ikj    dyn_em            1               XY              h{24} "UV_AVG"              "time-avg. product x-wind y-wind"  "m2 s-2"
-state   real    uw_avg             ikj    dyn_em            1               XZ              h{24} "UW_AVG"              "time-avg. product x-wind z-wind"  "m2 s-2"
-state   real    uq_avg             ikj    dyn_em            1               X               h{24} "UQ_AVG"              "time-avg. product x-wind Q"  "m s-1"
-state   real    ut_avg             ikj    dyn_em            1               X               h{24} "UT_AVG"              "time-avg. product x-wind theta (T-300K)"  "K m s-1"
+state   real    u2_avg       ikj    dyn_em     1    X    h{24} "U2_AVG"        "time-avg. squared x-wind component"  "m2 s-2"
+state   real    uv_avg       ikj    dyn_em     1    XY   h{24} "UV_AVG"        "time-avg. product x-wind y-wind"  "m2 s-2"
+state   real    uw_avg       ikj    dyn_em     1    XZ   h{24} "UW_AVG"        "time-avg. product x-wind z-wind"  "m2 s-2"
+state   real    uq_avg       ikj    dyn_em     1    X    h{24} "UQ_AVG"        "time-avg. product x-wind Q"  "m s-1"
+state   real    ut_avg       ikj    dyn_em     1    X    h{24} "UT_AVG"        "time-avg. product x-wind theta (T-300K)"  "K m s-1"
 
-state   real    v2_avg             ikj    dyn_em            1               Y               h{24} "V2_AVG"              "time-avg. squared y-wind component"  "m2 s-2"
-state   real    vw_avg             ikj    dyn_em            1               YZ              h{24} "VW_AVG"              "time-avg. product y-wind z-wind"  "m2 s-2"
-state   real    vq_avg             ikj    dyn_em            1               Y               h{24} "VQ_AVG"              "time-avg. product y-wind Q"  "m s-1"
-state   real    vt_avg             ikj    dyn_em            1               Y               h{24} "VT_AVG"              "time-avg. product y-wind theta (T-300K)"  "K m s-1"
+state   real    v2_avg       ikj    dyn_em     1    Y    h{24} "V2_AVG"        "time-avg. squared y-wind component"  "m2 s-2"
+state   real    vw_avg       ikj    dyn_em     1    YZ   h{24} "VW_AVG"        "time-avg. product y-wind z-wind"  "m2 s-2"
+state   real    vq_avg       ikj    dyn_em     1    Y    h{24} "VQ_AVG"        "time-avg. product y-wind Q"  "m s-1"
+state   real    vt_avg       ikj    dyn_em     1    Y    h{24} "VT_AVG"        "time-avg. product y-wind theta (T-300K)"  "K m s-1"
 
-state   real    w2_avg             ikj    dyn_em            1               Z               h{24} "W2_AVG"              "time-avg. squared z-wind component"  "m2 s-2"
-state   real    wq_avg             ikj    dyn_em            1               Z               h{24} "WQ_AVG"              "time-avg. product z-wind Q"  "m s-1"
-state   real    wt_avg             ikj    dyn_em            1               Z               h{24} "WT_AVG"              "time-avg. product z-wind theta (T-300K)"  "K m s-1"
+state   real    w2_avg       ikj    dyn_em     1    Z    h{24} "W2_AVG"        "time-avg. squared z-wind component"  "m2 s-2"
+state   real    wq_avg       ikj    dyn_em     1    Z    h{24} "WQ_AVG"        "time-avg. product z-wind Q"  "m s-1"
+state   real    wt_avg       ikj    dyn_em     1    Z    h{24} "WT_AVG"        "time-avg. product z-wind theta (T-300K)"  "K m s-1"
 
-state   real    q2_avg             ikj    dyn_em            1               -               h{24} "Q2_AVG"              "time-avg. squared Q"  ""
-state   real    qt_avg             ikj    dyn_em            1               -               h{24} "QT_AVG"              "time-avg. product Q theta (T-300K)"  "K"
+state   real    q2_avg       ikj    dyn_em     1    -    h{24} "Q2_AVG"        "time-avg. squared Q"  ""
+state   real    qt_avg       ikj    dyn_em     1    -    h{24} "QT_AVG"        "time-avg. product Q theta (T-300K)"  "K"
 
-state   real    t2_avg             ikj    dyn_em            1               -               h{24} "T2_AVG"              "time-avg. squared theta (T-300K)"  "K2"
+state   real    t2_avg       ikj    dyn_em     1    -    h{24} "T2_AVG"        "time-avg. squared theta (T-300K)"  "K2"
 
 # 3rd order statistics
-state   real    u3_avg             ikj    dyn_em            1               X               h{24} "U3_AVG"              "time-avg. cubed x-wind component"  "m2 s-2"
-state   real    v3_avg             ikj    dyn_em            1               Y               h{24} "V3_AVG"              "time-avg. cubed y-wind component"  "m2 s-2"
-state   real    w3_avg             ikj    dyn_em            1               Z               h{24} "W3_AVG"              "time-avg. cubed z-wind component"  "m2 s-2"
-state   real    q3_avg             ikj    dyn_em            1               -               h{24} "Q3_AVG"              "time-avg. cubed Q"  "m2 s-2"
-state   real    t3_avg             ikj    dyn_em            1               -               h{24} "T3_AVG"              "time-avg. cubed theta (T-300K)"  "m2 s-2"
+state   real    u3_avg       ikj    dyn_em     1    X    h{24} "U3_AVG"        "time-avg. cubed x-wind component"  "m2 s-2"
+state   real    v3_avg       ikj    dyn_em     1    Y    h{24} "V3_AVG"        "time-avg. cubed y-wind component"  "m2 s-2"
+state   real    w3_avg       ikj    dyn_em     1    Z    h{24} "W3_AVG"        "time-avg. cubed z-wind component"  "m2 s-2"
+state   real    q3_avg       ikj    dyn_em     1    -    h{24} "Q3_AVG"        "time-avg. cubed Q"  "m2 s-2"
+state   real    t3_avg       ikj    dyn_em     1    -    h{24} "T3_AVG"        "time-avg. cubed theta (T-300K)"  "m2 s-2"
 
 # Namelist options
 rconfig  integer  output_stats             namelist,diag    max_domains    0          - "output_stats"      "Output velocity statistics (0:no, 1:average, 2:2nd order, 3:3rd order)"

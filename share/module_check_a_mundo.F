@@ -3539,7 +3539,8 @@
             ENDIF
          ENDIF
 
-         IF (model_config_rec%output_avgfluxes(i)) THEN
+         !ML add the 2nd condition for statistics
+         IF (model_config_rec%output_avgfluxes(i) .or. model_config_rec%output_stats > 0) THEN
             !averaging time must be smaller or equal output interval
             output_interval = model_config_rec%auxhist24_interval  (i)*   60 + &
                               model_config_rec%auxhist24_interval_d(i)*86400 + &

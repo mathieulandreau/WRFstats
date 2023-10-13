@@ -78,6 +78,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    USE module_after_all_rk_steps
    USE module_llxy, ONLY : proj_cassini
    USE module_avgflx_em, ONLY : zero_avgflx, upd_avgflx
+   USE module_statistics, ONLY : zero_statistics
    USE module_cpl, ONLY : coupler_on, cpl_settime, cpl_store_input
 
 #if (WRF_CMAQ == 1)
@@ -4762,7 +4763,7 @@ BENCH_END(bc_2d_tim)
 
 
 ! new location for averaging. Moved here to include microphysics tendencies
-   IF ((config_flags%do_avgflx_em .EQ. 1) .or. config_flags%output_avgfluxes) THEN
+   IF ((config_flags%do_avgflx_em .EQ. 1) .or. config_flags%output_avgfluxes .or. (config_flags%output_stats > 0)) THEN
 ! Reinitialize time-averaged fluxes if history output was written after the previous time step:
       CALL WRFU_ALARMGET(grid%alarms( AUXHIST24_ALARM ),prevringtime=temp_time, RingInterval=intervaltime)
       CALL domain_clock_get ( grid, current_time=CurrTime, &
@@ -4784,14 +4785,15 @@ BENCH_END(bc_2d_tim)
       ENDIF
       CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       IF (CurrTime .lt. temp_time + dtInterval) THEN
-         WRITE ( message , FMT = '("solve_em: initializing avgflx at time ",A," on domain ",I3)' ) &
+         WRITE ( message , FMT = '("solve_em: initializing avgflx and/or statistics at time ",A," on domain ",I3)' ) &
               & TRIM(message2), grid%id
          CALL wrf_message(trim(message)) 
          grid%avgflx_count = 0
+         grid%stats_count = 0
+         IF ((config_flags%do_avgflx_em .EQ. 1) .or. config_flags%output_avgfluxes) THEN
 !tile-loop for zero_avgflx
-   !$OMP PARALLEL DO   &
-   !$OMP PRIVATE ( ij )
-
+         !$OMP PARALLEL DO   &
+         !$OMP PRIVATE ( ij )
          DO ij = 1 , grid%num_tiles
             CALL wrf_debug(200,'In solve_em, before zero_avgflx call')
             CALL zero_avgflx(grid%avgflx_rum,grid%avgflx_rvm,grid%avgflx_wwm, &
@@ -4831,13 +4833,21 @@ BENCH_END(bc_2d_tim)
                  &   grid%u_tend_damp_mean,grid%v_tend_damp_mean,grid%w_tend_damp_mean,                     &
                  &   grid%rhod_mean,grid%mut_mean,grid%z_mean,grid%dph_x_mean,grid%dph_y_mean                )
             CALL wrf_debug(200,'In solve_em, after zero_avgflx call')
-
+         ENDDO
+         !$OMP END PARALLEL DO
+         ENDIF
+         IF (config_flags%output_stats > 0) THEN
+!tile-loop for zero_statistics
+         !$OMP PARALLEL DO   &
+         !$OMP PRIVATE ( ij )
+         DO ij = 1 , grid%num_tiles
             CALL wrf_debug(200,'In solve_em, before zero_statistics call')
             CALL zero_statistics(grid, grid%output_stats,        &
                  &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), k_start    , k_end)
             CALL wrf_debug(200,'In solve_em, after zero_statistics call')
          ENDDO
-   !$OMP END PARALLEL DO
+         !$OMP END PARALLEL DO
+         ENDIF
       ENDIF
 
       ! Update avgflx quantities
@@ -4930,6 +4940,9 @@ BENCH_END(bc_2d_tim)
       !$OMP END PARALLEL DO
       IF (do_avg .or. (.not. config_flags%output_avgfluxes)) THEN
          grid%avgflx_count = grid%avgflx_count + 1
+      ENDIF
+      IF (config_flags%output_stats > 0) THEN
+         grid%stats_count = grid%stats_count + 1
       ENDIF
    ENDIF
 

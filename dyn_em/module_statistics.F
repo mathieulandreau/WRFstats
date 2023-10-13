@@ -1,43 +1,30 @@
 !WRF:MODEL_LAYER:DYNAMICS
 !
-MODULE module_avgflx_em
+MODULE module_statistics
 
-  USE module_bc
-  USE module_model_constants
-  USE module_wrf_error
-  USE module_state_description
+  USE module_model_constants, ONLY : R_v, R_d, T0, g
+  USE module_domain, ONLY : domain
+  USE modules_state_description, ONLY : P_QV
 
 CONTAINS
 
 !-------------------------------------------------------------------------------
+  !The calculation of time-average values is basic :
+  ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
+  ! Then :
+  ! <x>_0 = 0.                                      -> computed in zero_statistics
+  ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics
+  !There might exist better methods
 
-
-  SUBROUTINE zero_statistics(grid, output_stats)
+  SUBROUTINE zero_statistics(grid, output_stats, its, ite, jts, jte, kts, kte)
 
     IMPLICIT NONE
 
     TYPE(domain)             :: grid
     INTEGER, INTENT(IN   )   :: output_stats
-
-    INTEGER        ::      &
-      ids, ide, jds, jde, kds, kde,        &
-      ims, ime, jms, jme, kms, kme,        &
-      ips, ipe, jps, jpe, kps, kpe,        &
-      imsx, imex, jmsx, jmex, kmsx, kmex,  &
-      ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
-      imsy, imey, jmsy, jmey, kmsy, kmey,  &
-      ipsy, ipey, jpsy, jpey, kpsy, kpey
+    INTEGER, INTENT(IN   )   :: its, ite, jts, jte, kts, kte !tile limit indices
 
     INTEGER :: i,j,k
-
-    CALL get_ijk_from_grid (  grid ,                               &
-                              ids, ide, jds, jde, kds, kde,        &
-                              ims, ime, jms, jme, kms, kme,        &
-                              ips, ipe, jps, jpe, kps, kpe,        &
-                              imsx, imex, jmsx, jmex, kmsx, kmex,  &
-                              ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
-                              imsy, imey, jmsy, jmey, kmsy, kmey,  &
-                              ipsy, ipey, jpsy, jpey, kpsy, kpey )
 
     if (config_flags%output_stats > 0) then
       DO j=jts,jte
@@ -99,21 +86,23 @@ CONTAINS
     return
   END SUBROUTINE zero_statistics
 
-  SUBROUTINE upd_statistics(grid, output_stats)
-
+  SUBROUTINE upd_statistics(grid, output_stats, output_dry_theta_fluxes, its, ite, jts, jte, kts, kte)
+    ! Description
+    ! This routine is called after each call of solve_em so after each big timestep
+    ! It progressively calculates average values of the prognostic variables in mass grid and higher order
+    ! statistics if output_stats is higher
+    ! variances and covariances must be calculated in post_process programs, for example :
+    !     <u'v'> = <uv> - <u><v>
+    ! This routine is called in med_after_solve_io (in share/mediation_integrate.F)
+    ! The principle is based on WRFlux calculation but the calculation is different because I experienced
+    ! wrong results in nested domains for mean velocities (U_MEAN, UX_MEAN, ...) with WRFlux. I couldn't find
+    ! the origin of this error.
     IMPLICIT NONE
 
     TYPE(domain)             :: grid
-    INTEGER, INTENT(IN   )   :: output_stats
-
-    INTEGER        ::      &
-      ids, ide, jds, jde, kds, kde,        &
-      ims, ime, jms, jme, kms, kme,        &
-      ips, ipe, jps, jpe, kps, kpe,        &
-      imsx, imex, jmsx, jmex, kmsx, kmex,  &
-      ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
-      imsy, imey, jmsy, jmey, kmsy, kmey,  &
-      ipsy, ipey, jpsy, jpey, kpsy, kpey
+    INTEGER, INTENT(IN   )   :: output_stats !0=no stats, 1=mean, 2=1+2nd order moments, 3=2+3rd order moments
+    LOGICAL, INTENT(IN   )   :: output_dry_theta_fluxes !.true. = dry theta, .false. = moist theta
+    INTEGER, INTENT(IN   )   :: its, ite, jts, jte, kts, kte !tile limit indices
 
     INTEGER :: i,j,k
 
@@ -122,26 +111,18 @@ CONTAINS
     v,  & !destaggered v
     w,  & !destaggered w
     q,  & !qvapor
-    t,  & !dry theta perturbation (T-300K)
+    t,  & !dry or moist theta perturbation (T-300K)
     p,  & !pressure perturbation (P-PB)
     z   & !z perturbation (Z - PHB/g)
 
-    CALL get_ijk_from_grid (  grid ,                               &
-                              ids, ide, jds, jde, kds, kde,        &
-                              ims, ime, jms, jme, kms, kme,        &
-                              ips, ipe, jps, jpe, kps, kpe,        &
-                              imsx, imex, jmsx, jmex, kmsx, kmex,  &
-                              ipsx, ipex, jpsx, jpex, kpsx, kpex,  &
-                              imsy, imey, jmsy, jmey, kmsy, kmey,  &
-                              ipsy, ipey, jpsy, jpey, kpsy, kpey )
-
-    local_count = real(grid%avgflx_count)
-    count_p1 = local_count + 1.0
-
-    one_over_2g = 0.5/9.81
-    one_over_count_p1 = 1.0 / count_p1
-
     if (output_stats > 0) then
+      ! Note : These two lines are different than in upd_avgflx update because avgflx_count is incremented after
+      !        the call of upd_avgflx (in solve_em.F) but stats_count before the call of upd_statistics
+      count_p1 = real(grid%stats_count)
+      local_count = count_p1 - 1.0
+
+      one_over_2g = 0.5 / g
+      one_over_count_p1 = 1.0 / count_p1
 
       DO j=jts,jte
       DO i=its,ite
@@ -152,26 +133,38 @@ CONTAINS
       DO j=jts,jte
       DO k=kts,kte
       DO i=its,ite
-#if (EM_CORE == 1)
-        u = ((grid%u_2(i,k,j)*grid%cosa(i,j)-grid%v_2(i,k,j)*grid%sina(i,j)) + &
-        (grid%u_2(i+1,k,j)*grid%cosa(i+1,j)-grid%v_2(i+1,k,j)*grid%sina(i+1,j))) * 0.5
-        v = ((grid%v_2(i,k,j)*grid%cosa(i,j)+grid%u_2(i,k,j)*grid%sina(i,j)) + &
-        (grid%v_2(i,k,j+1)*grid%cosa(i,j+1)+grid%u_2(i,k,j+1)*grid%sina(i,j+1))) * 0.5
-        IF (grid%use_theta_m == 1) THEN
-          t = (grid%t_2(i,1,j)+T0)/(1.+R_v/R_d*grid%moist(i,1,j,P_QV)) - T0
-        ELSE
-          t =  grid%t_2(i,1,j)
-        END IF
-#else
-        u = grid%u(i,1,j)
-        v = grid%v(i,1,j)
-        t = grid%t(i,1,j)
-#endif
-        q = grid%moist(i,1,j,P_QV)
+        q = grid%moist(i,k,j,P_QV)
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
         z = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
-
+#if (EM_CORE == 1)
+        u = ((grid%u_2(i,k,j) + grid%u_2(i+1,k,j))*grid%cosa(i,j)  &
+            -(grid%v_2(i,k,j) + grid%v_2(i+1,k,j))*grid%sina(i,j)) * 0.5
+        v = ((grid%v_2(i,k,j) + grid%v_2(i,k,j+1))*grid%cosa(i,j)  &
+            +(grid%u_2(i,k,j) + grid%u_2(i,k,j+1))*grid%sina(i,j)) * 0.5
+        IF (output_dry_theta_fluxes) THEN
+          IF (grid%use_theta_m == 1) THEN
+            t = (grid%t_2(i,k,j)+T0) / (1.+R_v/R_d*q) - T0
+          ELSE
+            t = grid%t_2(i,k,j)
+          ENDIF
+        ELSE
+          IF (grid%use_theta_m == 1) THEN
+            t = grid%t_2(i,k,j)
+          ELSE
+            t = (grid%t_2(i,k,j)+T0) * (1.+R_v/R_d*q) - T0
+          ENDIF
+        ENDIF
+#else
+        u = grid%u(i,k,j)
+        v = grid%v(i,k,j)
+        t = grid%t(i,k,j) !I don't know if it is dry or moist
+#endif
+        !The calculation of time-average values is basic :
+        ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
+        ! Then :
+        ! <x>_0 = 0.                                      -> computed in zero_statistics
+        ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics (here)
         grid%u_avg(i,k,j) = (local_count*grid%u_avg(i,k,j)  +  u ) * one_over_count_p1
         grid%v_avg(i,k,j) = (local_count*grid%v_avg(i,k,j)  +  v ) * one_over_count_p1
         grid%w_avg(i,k,j) = (local_count*grid%w_avg(i,k,j)  +  w ) * one_over_count_p1
@@ -206,27 +199,8 @@ CONTAINS
       ENDDO
       ENDDO
       ENDDO
-    end if
+    endif
     return
   END SUBROUTINE upd_statistics
 
-  subroutine stagger_z(var_stag, var,                      &
-                       cf1, cf2, cf3, cfn, cfn1, fnm, fnp, &
-                       k, kms, kme, kde                    )
-
-    REAL, INTENT(OUT) :: var_stag
-    REAL, INTENT(IN) :: cf1, cf2, cf3, cfn, cfn1
-    INTEGER, INTENT(IN) ::  k, kms, kme, kde
-    REAL, DIMENSION(kms:kme) , INTENT(IN) :: var, fnm, fnp
-
-    if ( k .eq. kde) then
-      var_stag = cfn*var(kde-1)+cfn1*var(kde-2)
-    elseif ( k .eq. 1) then
-      var_stag = cf1*var(1)+cf2*var(2)+cf3*var(3)
-    else
-      var_stag = fnm(k)*var(k)+ fnp(k)*var(k-1)
-    endif
-
-  end subroutine stagger_z
-
-end MODULE module_avgflx_em
+end MODULE module_statistics

@@ -418,6 +418,7 @@ SUBROUTINE med_after_solve_io ( grid , config_flags )
    USE module_domain    , ONLY : domain
    USE module_timing
    USE module_configure , ONLY : grid_config_rec_type
+   USE module_statistics, ONLY : upd_statistics
   ! Model layer
 
    IMPLICIT NONE
@@ -425,6 +426,14 @@ SUBROUTINE med_after_solve_io ( grid , config_flags )
   ! Arguments
    TYPE(domain)                               :: grid
    TYPE (grid_config_rec_type) , INTENT(IN)   :: config_flags
+   INTEGER                                    :: ij,                                    &
+                                                 ids, ide, jds, jde, kds, kde,          &
+                                                 ims, ime, jms, jme, kms, kme,          &
+                                                 ips, ipe, jps, jpe, kps, kpe,          &
+                                                 imsx, imex, jmsx, jmex, kmsx, kmex,    &
+                                                 ipsx, ipex, jpsx, jpex, kpsx, kpex,    &
+                                                 imsy, imey, jmsy, jmey, kmsy, kmey,    &
+                                                 ipsy, ipey, jpsy, jpey, kpsy, kpey
 
    ! Compute time series variables
    CALL calc_ts(grid)
@@ -433,13 +442,22 @@ SUBROUTINE med_after_solve_io ( grid , config_flags )
    CALL track_driver(grid)
 
    ! Compute statistics
-   !tile-loop for zero_avgflx
+   CALL get_ijk_from_grid (  grid ,                   &
+   ids, ide, jds, jde, kds, kde,    &
+   ims, ime, jms, jme, kms, kme,    &
+   ips, ipe, jps, jpe, kps, kpe,    &
+   imsx, imex, jmsx, jmex, kmsx, kmex,    &
+   ipsx, ipex, jpsx, jpex, kpsx, kpex,    &
+   imsy, imey, jmsy, jmey, kmsy, kmey,    &
+   ipsy, ipey, jpsy, jpey, kpsy, kpey )
+
+   !tile-loop for upd_statistics
    !$OMP PARALLEL DO   &
    !$OMP PRIVATE ( ij )
    DO ij = 1 , grid%num_tiles
       CALL wrf_debug(200,'In med_after_solve_io, before upd_statistics call')
-      CALL upd_statistics(grid, grid%output_stats,        &
-           &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), k_start    , k_end)
+      CALL upd_statistics(grid, config_flags%output_stats, config_flags%output_dry_theta_fluxes,   &
+           &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), kps, kpe)
       CALL wrf_debug(200,'In med_after_solve_io, after upd_statistics call')
    ENDDO
    !$OMP END PARALLEL DO

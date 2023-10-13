@@ -11,6 +11,7 @@ include registry.io_boilerplate
 include registry.fire
 include registry.avgflx
 include registry.wrflux
+include registry.wrfstats
 include registry.stoch
 include registry.les
 include registry.cam

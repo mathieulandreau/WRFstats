@@ -88,6 +88,7 @@ SUBROUTINE solve_em_ad ( grid , config_flags  &
 !  USE module_after_all_rk_steps
    USE module_llxy, ONLY : proj_cassini
    USE module_avgflx_em, ONLY : zero_avgflx, upd_avgflx
+   USE module_statistics, ONLY : zero_statistics
 
    USE a_module_small_step_em
    USE a_module_em
@@ -3579,7 +3580,7 @@ BENCH_END(bc_end_tim)
 
    END DO Runge_Kutta_loop
 
-   IF (config_flags%do_avgflx_em .EQ. 1) THEN
+   IF ((config_flags%do_avgflx_em .EQ. 1) .or. (config_flags%output_stats > 0)) THEN
 ! Reinitialize time-averaged fluxes if history output was written after the previous time step:
 
       CALL WRFU_ALARMGET(grid%alarms( HISTORY_ALARM ),prevringtime=temp_time)
@@ -3600,10 +3601,12 @@ BENCH_END(bc_end_tim)
       CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
 
       IF (CurrTime .lt. temp_time + dtInterval) THEN
-         WRITE ( message , FMT = '("solve_em: initializing avgflx at time ",A," on domain ",I3)' ) &
+         WRITE ( message , FMT = '("solve_em: initializing avgflx and/or statistics at time ",A," on domain ",I3)' ) &
               & TRIM(message2), grid%id
          CALL wrf_message(trim(message))
          grid%avgflx_count = 0
+         grid%stats_count = 0
+         IF (config_flags%do_avgflx_em .EQ. 1) THEN
 !tile-loop for zero_avgflx
          !$OMP PARALLEL DO   &
          !$OMP PRIVATE ( ij )
@@ -3622,6 +3625,19 @@ BENCH_END(bc_end_tim)
             CALL wrf_debug(200,'In solve_em, after zero_avgflx call')
          ENDDO
          !$OMP END PARALLEL DO
+         ENDIF
+         IF (config_flags%output_stats > 0) THEN
+!tile-loop for zero_statistics
+         !$OMP PARALLEL DO   &
+         !$OMP PRIVATE ( ij )
+         DO ij = 1 , grid%num_tiles
+          CALL wrf_debug(200,'In solve_em_ad, before zero_statistics call')
+          CALL zero_statistics(grid, grid%output_stats,        &
+               &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), k_start    , k_end)
+          CALL wrf_debug(200,'In solve_em_ad, after zero_statistics call')
+         ENDDO
+         !$OMP END PARALLEL DO
+         ENDIF
       ENDIF
 
 ! Update avgflx quantities
@@ -3647,6 +3663,7 @@ BENCH_END(bc_end_tim)
       ENDDO
       !$OMP END PARALLEL DO
       grid%avgflx_count = grid%avgflx_count + 1
+      grid%stats_count = grid%stats_count + 1
    ENDIF
 !
    !$OMP PARALLEL DO   &

@@ -51,6 +51,7 @@
 
    USE module_model_constants
    USE module_avgflx_em, ONLY : zero_avgflx
+   USE module_statistics, ONLY : zero_statistics
 
    IMPLICIT NONE
    !  Input data.
@@ -1310,6 +1311,7 @@ endif
            & grid%id
       CALL wrf_message(trim(message))
       grid%avgflx_count = 0
+      grid%stats_count = 0
       f_flux = config_flags%do_avgflx_cugd .EQ. 1  ! WA 9/24/10
       DO ij = 1, grid%num_tiles
          call wrf_debug(200,'In start_em, before zero_avgflx call')
@@ -1348,8 +1350,12 @@ endif
               &   grid%t_tend_damp_mean,grid%q_tend_damp_mean,                                           &
               &   grid%u_tend_damp_mean,grid%v_tend_damp_mean,grid%w_tend_damp_mean,                     &
               &   grid%rhod_mean,grid%mut_mean,grid%z_mean,grid%dph_x_mean,grid%dph_y_mean                )
-
          call wrf_debug(200,'In start_em, after zero_avgflx call')
+
+         CALL wrf_debug(200,'In start_em, before zero_statistics call')
+         CALL zero_statistics(grid, grid%output_stats,        &
+              &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), kts, kte)
+         CALL wrf_debug(200,'In start_em, after zero_statistics call')
       ENDDO
    ENDIF
 
