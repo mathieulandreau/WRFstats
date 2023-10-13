@@ -4,7 +4,7 @@ MODULE module_statistics
 
   USE module_model_constants, ONLY : R_v, R_d, T0, g
   USE module_domain, ONLY : domain
-  USE modules_state_description, ONLY : P_QV
+  USE module_state_description, ONLY : P_QV
 
 CONTAINS
 

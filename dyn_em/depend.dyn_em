@@ -236,6 +236,7 @@ nest_init_utils.o: \
 
 start_em.o:     module_bc_em.o \
                 module_avgflx_em.o              \
+                module_statistics.o              \
                 module_stoch.o              \
 		../frame/module_domain.o \
 		../frame/module_configure.o  \
@@ -265,6 +266,7 @@ solve_em.o:     module_small_step_em.o \
                 module_first_rk_step_part2.o \
                 module_after_all_rk_steps.o  \
                 module_avgflx_em.o              \
+                module_statistics.o              \
 		module_polarfft.o \
 		../frame/module_domain.o \
 		../frame/module_configure.o  \
