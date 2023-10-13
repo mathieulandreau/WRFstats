@@ -26,7 +26,7 @@ CONTAINS
 
     INTEGER :: i,j,k
 
-    if (config_flags%output_stats > 0) then
+    if (output_stats > 0) then
       DO j=jts,jte
       DO i=its,ite
         grid%mut_avg(i,j) = 0.
@@ -45,7 +45,7 @@ CONTAINS
       END DO
       END DO
       END DO
-      if (config_flags%output_stats > 1) then
+      if (output_stats > 1) then
         DO j=jts,jte
         DO k=kts,kte
         DO i=its,ite
@@ -67,7 +67,7 @@ CONTAINS
         END DO
         END DO
         END DO
-        if (config_flags%output_stats > 2) then
+        if (output_stats > 2) then
           DO j=jts,jte
           DO k=kts,kte
           DO i=its,ite
@@ -113,7 +113,7 @@ CONTAINS
     q,  & !qvapor
     t,  & !dry or moist theta perturbation (T-300K)
     p,  & !pressure perturbation (P-PB)
-    z   & !z perturbation (Z - PHB/g)
+    z     !z perturbation (Z - PHB/g)
 
     if (output_stats > 0) then
       ! Note : These two lines are different than in upd_avgflx update because avgflx_count is incremented after
