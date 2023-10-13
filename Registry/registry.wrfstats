@@ -46,7 +46,7 @@ state   real    t3_avg       ikj    dyn_em     1    -    h{24} "T3_AVG"        "
 rconfig  integer  output_stats             namelist,diag    max_domains    0          - "output_stats"      "Output velocity statistics (0:no, 1:average, 2:2nd order, 3:3rd order)"
 
 # Packages
-package  stats_1     output_stats==1            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,rhod_avg,mut_avg,z_avg
-package  stats_2     output_stats==2            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,rhod_avg,mut_avg,z_avg,u2_avg,uv_avg,uw_avg,uq_avg,ut_avg,v2_avg,vw_avg,vq_avg,vt_avg,w2_avg,wq_avg,wt_avg,q2_avg,qt_avg,t2_avg
-package  stats_3     output_stats==3            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,rhod_avg,mut_avg,z_avg,u2_avg,uv_avg,uw_avg,uq_avg,ut_avg,v2_avg,vw_avg,vq_avg,vt_avg,w2_avg,wq_avg,wt_avg,q2_avg,qt_avg,t2_avg,u3_avg,v3_avg,w3_avg,q3_avg,t3_avg
-package  sgs_fluxes  output_sgs_fluxes==.true.  -  state:ftx_sgs_avg,fty_sgs_avg,ftz_sgs_avg,fqx_sgs_avg,fqy_sgs_avg,fqz_sgs_avg,fux_sgs_avg,fuz_sgs_avg,fvx_sgs_avg,fvy_sgs_avg,fvz_sgs_avg,fwx_sgs_avg,fwy_sgs_avg,fwz_sgs_avg 
+package  stats_1     output_stats==1            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,p_avg,mut_avg,z_avg
+package  stats_2     output_stats==2            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,p_avg,mut_avg,z_avg,u2_avg,uv_avg,uw_avg,uq_avg,ut_avg,v2_avg,vw_avg,vq_avg,vt_avg,w2_avg,wq_avg,wt_avg,q2_avg,qt_avg,t2_avg
+package  stats_3     output_stats==3            -  state:u_avg,v_avg,w_avg,q_avg,t_avg,p_avg,mut_avg,z_avg,u2_avg,uv_avg,uw_avg,uq_avg,ut_avg,v2_avg,vw_avg,vq_avg,vt_avg,w2_avg,wq_avg,wt_avg,q2_avg,qt_avg,t2_avg,u3_avg,v3_avg,w3_avg,q3_avg,t3_avg
+#package  sgs_fluxes  output_sgs_fluxes==.true.  -  state:ftx_sgs_avg,fty_sgs_avg,ftz_sgs_avg,fqx_sgs_avg,fqy_sgs_avg,fqz_sgs_avg,fux_sgs_avg,fuz_sgs_avg,fvx_sgs_avg,fvy_sgs_avg,fvz_sgs_avg,fwx_sgs_avg,fwy_sgs_avg,fwz_sgs_avg 
