@@ -174,6 +174,11 @@ SUBROUTINE calc_ts_locations( grid )
       
       ! Determine time series locations for domain
       IF (.NOT. grid%have_calculated_tslocs) THEN
+
+         WRITE(*,*) "INSIDE CALC_TS_LOCATION, grid%id = ", grid%id, &
+         & ", grid%have_calculated_tslocs", grid%have_calculated_tslocs, &
+         & ", grid%itimestep", grid%itimestep
+
          grid%have_calculated_tslocs = .TRUE.
          WRITE(message, '(A43,I3,A15,A19)') 'Computing time series locations for domain ', grid%id, &
                                             ' starting from ',simulation_start_date

@@ -39,6 +39,10 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 
 #if ((EM_CORE == 1) && (DA_CORE != 1))
 
+WRITE(*,*) "CALC_TS_LOCATION BEGINNING OF START_DOMAIN, grid%id = ", grid%id, &
+& ", grid%have_calculated_tslocs", grid%have_calculated_tslocs, &
+& ", grid%itimestep", grid%itimestep
+
 #if ( WRFPLUS == 1 )
    IF ( model_config_rec%dyn_opt .EQ. dyn_em_tl ) THEN
       CALL g_start_domain_em( grid, allowed_to_read  &
@@ -69,6 +73,9 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 
 #if (DA_CORE != 1)
    IF ( grid%itimestep .EQ. 0 ) THEN
+      WRITE(*,*) "CALC_TS_LOCATION, grid%id = ", grid%id, &
+      & ", grid%have_calculated_tslocs", grid%have_calculated_tslocs, &
+      & ", grid%itimestep", grid%itimestep
       CALL calc_ts_locations( grid )
       CALL calc_track_locations( grid )
    END IF
