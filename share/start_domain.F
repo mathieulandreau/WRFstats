@@ -13,7 +13,6 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
    LOGICAL, INTENT(IN)    :: allowed_to_read
    !  Local data.
    INTEGER :: idum1, idum2
-   LOGICAL :: already_went_there
 
    INTERFACE
 #if ((EM_CORE == 1) && (DA_CORE != 1))
@@ -38,18 +37,12 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 
    CALL set_scalar_indices_from_config ( head_grid%id , idum1, idum2 )
    
-   !Test to not reinitialize tslist
-   already_went_there = .FALSE.
+   !Test to not reinitialize tslist when calling start_domain(parent) during a nest initialization 
    IF ( grid%itimestep > 0 ) THEN
-      already_went_there = .TRUE.
+      grid%have_calculated_tslocs = .TRUE.
    END IF
 
 #if ((EM_CORE == 1) && (DA_CORE != 1))
-
-   WRITE(*,*) "CALC_TS_LOCATION BEGINNING OF START_DOMAIN, grid%id = ", grid%id, &
-   & ", grid%have_calculated_tslocs", grid%have_calculated_tslocs, &
-   & ", grid%itimestep", grid%itimestep, &
-   & ", already_went_there", already_went_there
 
 #if ( WRFPLUS == 1 )
    IF ( model_config_rec%dyn_opt .EQ. dyn_em_tl ) THEN
@@ -80,13 +73,8 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 #endif
 
 #if (DA_CORE != 1)
-   IF ( .not. already_went_there ) THEN
-      WRITE(*,*) "CALC_TS_LOCATION, grid%id = ", grid%id, &
-      & ", grid%have_calculated_tslocs", grid%have_calculated_tslocs, &
-      & ", grid%itimestep", grid%itimestep
-      CALL calc_ts_locations( grid )
-      CALL calc_track_locations( grid )
-   END IF
+   CALL calc_ts_locations( grid )
+   CALL calc_track_locations( grid )
 #endif
 
 END SUBROUTINE start_domain
