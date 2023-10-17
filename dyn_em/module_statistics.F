@@ -123,8 +123,10 @@ CONTAINS
     u,  & !destaggered u
     v,  & !destaggered v
     w,  & !destaggered w
-    q,  & !qvapor
-    t,  & !dry or moist theta perturbation (T-300K)
+    q,  & !total mixing ratio (in fact only rain + cloud + vapor)
+    qv, & !qvapor
+    pt, & !dry theta perturbation (PT-300K)
+    ptv,& !moist theta perturbation (PTV-300K)
     p,  & !pressure perturbation (P-PB)
     z     !z perturbation (Z - PHB/g)
 
@@ -147,7 +149,7 @@ CONTAINS
       DO k=kts,kte
       DO i=its,ite
         qv = grid%moist(i,k,j,P_QV)
-        q = qv + moist(:,:,:,P_QC) + moist(:,:,:,P_QR) ! We don't considere ice and snow here
+        q = qv + moist(i,k,j,P_QC) + moist(i,k,j,P_QR) ! We don't considere ice and snow here
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
         z = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
@@ -157,16 +159,17 @@ CONTAINS
         v = ((grid%v_2(i,k,j) + grid%v_2(i,k,j+1))*grid%cosa(i,j)  &
             +(grid%u_2(i,k,j) + grid%u_2(i,k,j+1))*grid%sina(i,j)) * 0.5
         IF (grid%use_theta_m == 1) THEN
-          pt = (grid%t_2(i,k,j)+T0) / (1.+R_v/R_d*qv) - T0
           ptv = grid%t_2(i,k,j)
+          pt = (ptv+T0) / (1.+R_v/R_d*qv) - T0
         ELSE
           pt = grid%t_2(i,k,j)
-          ptv = (grid%t_2(i,k,j)+T0) * (1.+R_v/R_d*qv) - T0
+          ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
         ENDIF
 #else
         u = grid%u(i,k,j)
         v = grid%v(i,k,j)
-        t = grid%t(i,k,j) !I don't know if it is dry or moist
+        pt = grid%pt(i,k,j) !I don't know if it is dry or moist, I assume dry
+        ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
         !The calculation of time-average values is basic :
         ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
