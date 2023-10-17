@@ -37,6 +37,11 @@ SUBROUTINE start_domain ( grid , allowed_to_read )
 
    CALL set_scalar_indices_from_config ( head_grid%id , idum1, idum2 )
 
+   !Test to not reinitialize tslist when calling start_domain(parent) during a nest initialization 
+   IF ( grid%itimestep > 0 ) THEN
+      grid%have_calculated_tslocs = .TRUE.
+   END IF
+
 #if ((EM_CORE == 1) && (DA_CORE != 1))
 
 #if ( WRFPLUS == 1 )
