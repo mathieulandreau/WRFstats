@@ -2651,7 +2651,7 @@
          IF ( model_config_rec % max_ts_level(i) .gt. model_config_rec %e_vert(i)-1 )  then
          wrf_err_message = ' max_ts_level must be <= number of znu half layers '
          CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
-         wrf_err_message = ' max_ts_level is reset to the number of znu half layers '
+         write(wrf_err_message,'(A,I2)') "max_ts_level is reset to the number of znu half layers in grid_id=",i
          CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
          model_config_rec % max_ts_level(i) = model_config_rec %e_vert(i)-1
          ENDIF
