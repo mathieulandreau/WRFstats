@@ -149,7 +149,7 @@ CONTAINS
       DO k=kts,kte
       DO i=its,ite
         qv = grid%moist(i,k,j,P_QV)
-        q = qv + moist(i,k,j,P_QC) + moist(i,k,j,P_QR) ! We don't considere ice and snow here
+        q = qv + grid%moist(i,k,j,P_QC) + grid%moist(i,k,j,P_QR) ! We don't considere ice and snow here
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
         z = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
