@@ -1008,6 +1008,23 @@
          END IF
       ENDDO
 
+
+!-----------------------------------------------------------------------
+! Check that if interp_soil_fine_lu /= 0, fine_input_stream must also be in use
+!-----------------------------------------------------------------------
+
+      DO i = 1, model_config_rec % max_dom
+         IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
+         IF ( ( model_config_rec%interp_soil_fine_lu(i) .NE. 0 ).AND. &
+              ( model_config_rec%fine_input_stream(i) .EQ. 0 ) ) THEN
+            wrf_err_message = '--- NOTE: If interp_soil_fine_lu /= 0, fine_input_stream must be /= 0'
+            CALL wrf_debug ( wrf_err_message )
+            wrf_err_message = '--- NOTE:   ----> Resetting interp_soil_fine_lu to 0'
+            CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
+            model_config_rec%interp_soil_fine_lu(i) = 0
+         END IF
+      ENDDO
+
 #if (EM_CORE == 1)
 
 !-----------------------------------------------------------------------

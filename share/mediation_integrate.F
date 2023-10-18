@@ -771,6 +771,30 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 #endif
      END IF
 
+     IF (model_config_rec%interp_soil_fine_lu == 1) THEN
+         WRITE(message,FMT='(A,I2,A,I2,A)') '*** Initializing soil quantities in nest domain #',nest%id,&
+                                     ' by horizontally interpolating parent domain #' ,parent%id, &
+                                     ' after having read fine land_use data in wrfinput file. ***'
+         CALL wrf_debug ( 0 , message )
+         CALL interp_mask_field(&
+            (SIZE(nest%intermediate_grid%tslb,1)*SIZE(nest%intermediate_grid%tslb,3) .GT. 1),&
+            nest%intermediate_grid%tslb,&
+            cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
+            cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
+            cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+            nest%tslb,&
+            nids, nide, 1, config_flags%num_soil_layers, njds, njde,&
+            nims, nime, 1, config_flags%num_soil_layers, njms, njme,&
+            nips, nipe, 1, config_flags%num_soil_layers, njps, njpe,&
+            config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater,&
+         )
+     ENDIF
+
 ! feedback, mostly for this new terrain, but it is the safe thing to do
      parent%ht_coarse = parent%ht
 
