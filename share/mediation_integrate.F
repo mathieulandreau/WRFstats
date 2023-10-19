@@ -537,6 +537,9 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
    INTEGER                :: ids , ide , jds , jde , kds , kde , &
                              ims , ime , jms , jme , kms , kme , &
                              ips , ipe , jps , jpe , kps , kpe
+   INTEGER                :: cids, cide, cjds, cjde, ckds, ckde,    &
+                             cims, cime, cjms, cjme, ckms, ckme,    &
+                             cips, cipe, cjps, cjpe, ckps, ckpe
 
 #if (EM_CORE == 1)
 #ifdef MOVE_NESTS
@@ -776,6 +779,10 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                      ' by horizontally interpolating parent domain #' ,parent%id, &
                                      ' after having read fine land_use data in wrfinput file. ***'
          CALL wrf_debug ( 0 , message )
+         CALL get_ijk_from_grid (  nest%intermediate_grid,                   &
+                                   cids, cide, cjds, cjde, ckds, ckde,    &
+                                   cims, cime, cjms, cjme, ckms, ckme,    &
+                                   cips, cipe, cjps, cjpe, ckps, ckpe    )
          CALL interp_mask_field(&
             (SIZE(nest%intermediate_grid%tslb,1)*SIZE(nest%intermediate_grid%tslb,3) .GT. 1),&
             nest%intermediate_grid%tslb,&
@@ -783,10 +790,10 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
             cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
             nest%tslb,&
-            nids, nide, 1, config_flags%num_soil_layers, njds, njde,&
-            nims, nime, 1, config_flags%num_soil_layers, njms, njme,&
-            nips, nipe, 1, config_flags%num_soil_layers, njps, njpe,&
-            config_flags%shw, nest%imask_nostag,&
+             ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
+             ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
+             ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
             .FALSE.,.FALSE.,&
             nest%i_parent_start, nest%j_parent_start,&
             nest%parent_grid_ratio, nest%parent_grid_ratio,&
