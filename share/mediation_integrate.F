@@ -771,7 +771,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 #endif
      END IF
 
-     IF (model_config_rec%interp_soil_fine_lu == 1) THEN
+     IF (nestconfig_flags%interp_soil_fine_lu == 1) THEN
          WRITE(message,FMT='(A,I2,A,I2,A)') '*** Initializing soil quantities in nest domain #',nest%id,&
                                      ' by horizontally interpolating parent domain #' ,parent%id, &
                                      ' after having read fine land_use data in wrfinput file. ***'
@@ -791,7 +791,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%i_parent_start, nest%j_parent_start,&
             nest%parent_grid_ratio, nest%parent_grid_ratio,&
             nest%intermediate_grid%lu_index, nest%lu_index,&
-            nest%intermediate_grid%iswater, nest%iswater,&
+            nest%intermediate_grid%iswater, nest%iswater&
          )
      ENDIF
 
