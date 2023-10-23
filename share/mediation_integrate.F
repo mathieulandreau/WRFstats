@@ -853,7 +853,24 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%iswater, nest%iswater&
          )
          CALL interp_mask_field_fine_lu(&
-            (SIZE(nest%intermediate_grid%sstsk,1)*SIZE(nest%intermediate_grid%sstsk,3) .GT. 1),&
+            (SIZE(nest%intermediate_grid%tsk,1)*SIZE(nest%intermediate_grid%tsk,2) .GT. 1),&
+            nest%intermediate_grid%tsk,&
+            cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
+            cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
+            cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+            nest%tsk,&
+             ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
+             ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
+             ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater&
+         )
+         CALL interp_mask_field_fine_lu(&
+            (SIZE(nest%intermediate_grid%sstsk,1)*SIZE(nest%intermediate_grid%sstsk,2) .GT. 1),&
             nest%intermediate_grid%sstsk,&
             cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
             cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
@@ -870,7 +887,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%iswater, nest%iswater&
          )
          CALL interp_mask_field_fine_lu(&
-            (SIZE(nest%intermediate_grid%udrunoff,1)*SIZE(nest%intermediate_grid%udrunoff,3) .GT. 1),&
+            (SIZE(nest%intermediate_grid%udrunoff,1)*SIZE(nest%intermediate_grid%udrunoff,2) .GT. 1),&
             nest%intermediate_grid%udrunoff,&
             cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
             cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
@@ -887,7 +904,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%iswater, nest%iswater&
          )
          CALL interp_mask_field_fine_lu(&
-            (SIZE(nest%intermediate_grid%sfcrunoff,1)*SIZE(nest%intermediate_grid%sfcrunoff,3) .GT. 1),&
+            (SIZE(nest%intermediate_grid%sfcrunoff,1)*SIZE(nest%intermediate_grid%sfcrunoff,2) .GT. 1),&
             nest%intermediate_grid%sfcrunoff,&
             cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
             cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&

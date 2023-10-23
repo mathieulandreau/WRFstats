@@ -4710,10 +4710,10 @@ END MODULE module_interp_info
    FUNCTION search_extrap(xx, yy, izz, array, start_x, end_x, &
               start_y, end_y, start_z, end_z, msgval, mask_relational, maskval, mask_array)
  
-      implicit none
-
       USE bitarray_module
       USE queue_module
+
+      implicit none
 
       ! Arguments
       integer, intent(in) :: start_x, start_y, start_z
@@ -4924,7 +4924,7 @@ END MODULE module_interp_info
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
 
       ! Local
-
+      REAL :: search_extrap ! function
       INTEGER ci, cj, ck, ni, nj, nk, ip, jp, xx, yy !ML add xx, yy for search
       INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
       REAL :: avg, sum, dx , dy
