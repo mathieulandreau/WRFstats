@@ -456,7 +456,7 @@ SUBROUTINE med_after_solve_io ( grid , config_flags )
    !$OMP PRIVATE ( ij )
    DO ij = 1 , grid%num_tiles
       CALL wrf_debug(200,'In med_after_solve_io, before upd_statistics call')
-      CALL upd_statistics(grid, config_flags%output_stats, config_flags%output_dry_theta_fluxes,   &
+      CALL upd_statistics(grid, config_flags%output_stats, config_flags%use_theta_m,   &
            &   grid%i_start(ij), grid%i_end(ij), grid%j_start(ij), grid%j_end(ij), kps, kpe)
       CALL wrf_debug(200,'In med_after_solve_io, after upd_statistics call')
    ENDDO

@@ -43,6 +43,7 @@ CONTAINS
         grid%qv_avg(i,k,j) = 0.
         grid%q_avg(i,k,j) = 0.
         grid%p_avg(i,k,j) = 0.
+        grid%tke_avg(i,k,j) = 0.
       END DO
       END DO
       END DO
@@ -57,7 +58,7 @@ CONTAINS
           grid%ptv2_avg(i,k,j) = 0.
           grid%q2_avg(i,k,j) = 0.
           grid%qv2_avg(i,k,j) = 0.
-          grid%p2_avg(i,k,j) = 0.
+          !grid%p2_avg(i,k,j) = 0.
           grid%z2_avg(i,k,j) = 0.
 
           grid%uv_avg(i,k,j) = 0.
@@ -99,7 +100,7 @@ CONTAINS
     return
   END SUBROUTINE zero_statistics
 
-  SUBROUTINE upd_statistics(grid, output_stats, output_dry_theta_fluxes, its, ite, jts, jte, kts, kte)
+  SUBROUTINE upd_statistics(grid, output_stats, use_theta_m, its, ite, jts, jte, kts, kte)
     ! Description
     ! This routine is called after each call of solve_em so after each big timestep
     ! It progressively calculates average values of the prognostic variables in mass grid and higher order
@@ -114,10 +115,10 @@ CONTAINS
 
     TYPE(domain)             :: grid
     INTEGER, INTENT(IN   )   :: output_stats !0=no stats, 1=mean, 2=1+2nd order moments, 3=2+3rd order moments
-    LOGICAL, INTENT(IN   )   :: output_dry_theta_fluxes !.true. = dry theta, .false. = moist theta
+    LOGICAL, INTENT(IN   )   :: use_theta_m !0 = dry theta, 1 = moist theta
     INTEGER, INTENT(IN   )   :: its, ite, jts, jte, kts, kte !tile limit indices
 
-    INTEGER :: i,j,k
+    INTEGER :: i,j,k, tke_opt
 
     REAL :: local_count, count_p1, one_over_2g, one_over_count_p1,  &
     u,  & !destaggered u
@@ -139,6 +140,15 @@ CONTAINS
       one_over_2g = 0.5 / g
       one_over_count_p1 = 1.0 / count_p1
 
+      ! some settings before loop to be sure compiler knows they are invariant in loop
+      IF (SIZE(grid%tke_2,1) * SIZE(grid%tke_2,3) > 1) THEN
+        tke_opt = 1
+      ELSE IF (SIZE(grid%tke_pbl,1) * SIZE(grid%tke_pbl,3) > 1) THEN
+        tke_opt = 2
+      ELSE 
+        tke_opt = 0
+      END IF
+
       DO j=jts,jte
       DO i=its,ite
         grid%mut_avg(i,j) = (local_count*grid%mut_avg(i,j)  +  grid%mut(i,j) ) * one_over_count_p1
@@ -153,12 +163,19 @@ CONTAINS
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
         z = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
+        IF (tke_opt == 1) THEN
+          tke = grid%tke_2(i,k,j)
+        ELSE IF (tke_opt == 2) THEN
+          tke = grid%tke_pbl(i,k,j)
+        ELSE 
+          tke = 0
+        END IF
 #if (EM_CORE == 1)
         u = ((grid%u_2(i,k,j) + grid%u_2(i+1,k,j))*grid%cosa(i,j)  &
             -(grid%v_2(i,k,j) + grid%v_2(i+1,k,j))*grid%sina(i,j)) * 0.5
         v = ((grid%v_2(i,k,j) + grid%v_2(i,k,j+1))*grid%cosa(i,j)  &
             +(grid%u_2(i,k,j) + grid%u_2(i,k,j+1))*grid%sina(i,j)) * 0.5
-        IF (grid%use_theta_m == 1) THEN
+        IF (use_theta_m == 1) THEN
           ptv = grid%t_2(i,k,j)
           pt = (ptv+T0) / (1.+R_v/R_d*qv) - T0
         ELSE
@@ -185,6 +202,7 @@ CONTAINS
         grid%qv_avg(i,k,j)  = (local_count*grid%qv_avg(i,k,j)  +  qv )  * one_over_count_p1
         grid%q_avg(i,k,j)   = (local_count*grid%q_avg(i,k,j)   +  q )   * one_over_count_p1
         grid%p_avg(i,k,j)   = (local_count*grid%p_avg(i,k,j)   +  p )   * one_over_count_p1
+        grid%tke_avg(i,k,j) = (local_count*grid%tke_avg(i,k,j) +  tke ) * one_over_count_p1
         if (output_stats > 1) then
           grid%u2_avg(i,k,j)   = (local_count*grid%u2_avg(i,k,j)   +  u*u )     * one_over_count_p1
           grid%v2_avg(i,k,j)   = (local_count*grid%v2_avg(i,k,j)   +  v*v )     * one_over_count_p1

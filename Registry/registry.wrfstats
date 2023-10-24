@@ -16,6 +16,7 @@ state   real    ptv_avg      ikj    dyn_em     1    -    h{24} "PTV_AVG"      "t
 state   real    qv_avg       ikj    dyn_em     1    -    h{24} "QV_AVG"       "time-avg. water vapor mixing ratio" ""
 state   real    q_avg        ikj    dyn_em     1    -    h{24} "Q_AVG"        "time-avg. total mixing ratio" ""
 state   real    p_avg        ikj    dyn_em     1    -    h{24} "P_AVG"        "time-avg. pressure" ""
+state   real    tke_avg      ikj    dyn_em     1    -    h{24} "TKE_AVG"      "time-avg. SFS TKE" "m2 s-2"
 
 # 2nd order statistics
 state   real    u2_avg       ikj    dyn_em     1    -    h{24} "U2_AVG"        "time-avg. squared x-wind component on mass grid"  "m2 s-2"
@@ -25,7 +26,7 @@ state   real    pt2_avg      ikj    dyn_em     1    -    h{24} "PT2_AVG"       "
 state   real    ptv2_avg     ikj    dyn_em     1    -    h{24} "PTV2_AVG"      "time-avg. squared moist theta (PTV-300K)"  "K2"
 state   real    q2_avg       ikj    dyn_em     1    -    h{24} "Q2_AVG"        "time-avg. squared Q"  ""
 state   real    qv2_avg      ikj    dyn_em     1    -    h{24} "QV2_AVG"       "time-avg. squared QV"  ""
-state   real    p2_avg       ikj    dyn_em     1    -    h{24} "P2_AVG"        "time-avg. squared pressure"  "Pa2"
+#state   real    p2_avg       ikj    dyn_em     1    -    h{24} "P2_AVG"        "time-avg. squared pressure"  "Pa2"
 state   real    z2_avg       ikj    dyn_em     1    -    h{24} "Z2_AVG"        "time-avg. squared height perturbation (Z-BaseZ)"  "m2 (ASL)"
 
 state   real    uv_avg       ikj    dyn_em     1    -    h{24} "UV_AVG"        "time-avg. product x-wind y-wind on mass grid"  "m2 s-2"
