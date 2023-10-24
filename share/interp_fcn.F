@@ -191,7 +191,7 @@ module bitarray_module
       if (associated(b%iarray)) then
          deallocate(b%iarray)
       else
-         call wrf_error('In bitarray_destroy(), b is not allocated.')
+         call wrf_message('In bitarray_destroy(), b is not allocated.')
       end if
  
    end subroutine bitarray_destroy
