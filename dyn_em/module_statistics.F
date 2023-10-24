@@ -115,7 +115,7 @@ CONTAINS
 
     TYPE(domain)             :: grid
     INTEGER, INTENT(IN   )   :: output_stats !0=no stats, 1=mean, 2=1+2nd order moments, 3=2+3rd order moments
-    LOGICAL, INTENT(IN   )   :: use_theta_m !0 = dry theta, 1 = moist theta
+    INTEGER, INTENT(IN   )   :: use_theta_m  !0=dry theta, 1=moist theta
     INTEGER, INTENT(IN   )   :: its, ite, jts, jte, kts, kte !tile limit indices
 
     INTEGER :: i,j,k, tke_opt
@@ -129,7 +129,8 @@ CONTAINS
     pt, & !dry theta perturbation (PT-300K)
     ptv,& !moist theta perturbation (PTV-300K)
     p,  & !pressure perturbation (P-PB)
-    z     !z perturbation (Z - PHB/g)
+    z,  & !z perturbation (Z - PHB/g)
+    tke   !tke_pbl in RANS with MYJ scheme, tke_sfs for LES with TKE scheme, 0 otherwhile
 
     if (output_stats > 0) then
       ! Note : These two lines are different than in upd_avgflx update because avgflx_count is incremented after
@@ -211,7 +212,7 @@ CONTAINS
           grid%ptv2_avg(i,k,j) = (local_count*grid%ptv2_avg(i,k,j) +  ptv*ptv ) * one_over_count_p1
           grid%q2_avg(i,k,j)   = (local_count*grid%q2_avg(i,k,j)   +  q*q )     * one_over_count_p1
           grid%qv2_avg(i,k,j)  = (local_count*grid%qv2_avg(i,k,j)  +  qv*qv )   * one_over_count_p1
-          grid%p2_avg(i,k,j)   = (local_count*grid%p2_avg(i,k,j)   +  p*p )     * one_over_count_p1
+          !grid%p2_avg(i,k,j)   = (local_count*grid%p2_avg(i,k,j)   +  p*p )     * one_over_count_p1
           grid%z2_avg(i,k,j)   = (local_count*grid%z2_avg(i,k,j)   +  z*z )     * one_over_count_p1
 
           grid%uv_avg(i,k,j)   = (local_count*grid%uv_avg(i,k,j)   +  u*v )     * one_over_count_p1
