@@ -4721,7 +4721,7 @@ END MODULE module_interp_info
       integer, intent(in) :: izz                ! The z-index of the 2d-array to search
       real, intent(in) :: xx , yy               ! The location of the search origin 
       real, intent(in) :: msgval
-      real, intent(in), optional :: maskval
+      integer, intent(in), optional :: maskval
       real, dimension(start_x:end_x, start_y:end_y, start_z:end_z), &
           intent(in) :: array 
        ! integer, dimension(:), intent(in) :: interp_list !ML remove this
@@ -4944,7 +4944,7 @@ END MODULE module_interp_info
             integer, intent(in) :: izz                ! The z-index of the 2d-array to search
             real, intent(in) :: xx , yy               ! The location of the search origin 
             real, intent(in) :: msgval
-            real, intent(in), optional :: maskval
+            integer, intent(in), optional :: maskval
             real, dimension(start_x:end_x, start_y:end_y, start_z:end_z), &
                intent(in) :: array 
             real, dimension(start_x:end_x, start_y:end_y), &
