@@ -4924,7 +4924,8 @@ END MODULE module_interp_info
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
 
       ! Local
-      INTEGER ci, cj, ck, ni, nj, nk, ip, jp, xx, yy !ML add xx, yy for search
+      INTEGER :: ci, cj, ck, ni, nj, nk, ip, jp
+      REAL :: xx, yy !ML add xx, yy for search
       INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
       REAL :: avg, sum, dx , dy
       INTEGER :: icount_water(nkts:nkte), icount_land(nkts:nkte), idummy(nkts:nkte)
@@ -5057,16 +5058,8 @@ END MODULE module_interp_info
                      !ML : If the surrounding coarse values are all WATER points, do a search
                      IF (ALL( clu(ci:ci+1,cj:cj+1) == iswater )) THEN
                         !start search from the nearest point
-                        IF (dx < 0.5) THEN
-                           xx = ci
-                        ELSE
-                           xx = ci+1
-                        END IF 
-                        IF (dy < 0.5) THEN
-                           yy = cj
-                        ELSE
-                           yy = cj+1
-                        END IF 
+                        xx = REAL(ci) + dx
+                        yy = REAL(cj) + dy
                         nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cims, cime, &
                                     cjms, cjme, ckms, ckme, 1000.0, ' ', iswater, clu)
                         IF (nfld(ni,nk,nj) == 1000.0) THEN
