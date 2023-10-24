@@ -4924,7 +4924,6 @@ END MODULE module_interp_info
       REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
 
       ! Local
-      REAL :: search_extrap ! function
       INTEGER ci, cj, ck, ni, nj, nk, ip, jp, xx, yy !ML add xx, yy for search
       INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
       REAL :: avg, sum, dx , dy
@@ -4933,8 +4932,30 @@ END MODULE module_interp_info
       CHARACTER (len=256) :: message
       CHARACTER (len=256) :: a_mess
 
-      !  Find out what the water value is.
+      INTERFACE
+         FUNCTION search_extrap(xx, yy, izz, array, start_x, end_x, &
+            start_y, end_y, start_z, end_z, msgval, mask_relational, maskval, mask_array)
+            USE bitarray_module
+            USE queue_module
+            ! Arguments
+            integer, intent(in) :: start_x, start_y, start_z
+            integer, intent(in) :: end_x, end_y, end_z
+            integer, intent(in) :: izz                ! The z-index of the 2d-array to search
+            real, intent(in) :: xx , yy               ! The location of the search origin 
+            real, intent(in) :: msgval
+            real, intent(in), optional :: maskval
+            real, dimension(start_x:end_x, start_y:end_y, start_z:end_z), &
+               intent(in) :: array 
+            real, dimension(start_x:end_x, start_y:end_y), &
+               intent(in), optional :: mask_array 
+            character (len=1), intent(in), optional :: mask_relational
 
+            ! Return value
+            real :: search_extrap
+         END FUNCTION search_extrap
+      END INTERFACE
+
+      !  Find out what the water value is.
       !CALL nl_get_iswater(1,iswater)
       iswater = nflag
 
