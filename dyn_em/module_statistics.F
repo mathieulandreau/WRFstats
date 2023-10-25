@@ -44,10 +44,10 @@ CONTAINS
         grid%q_avg(i,k,j) = 0.
         grid%p_avg(i,k,j) = 0.
         grid%tke_avg(i,k,j) = 0.
-        grid%rho_avg(i,k,j) = 0.
+        grid%t_avg(i,k,j) = 0.
         grid%rhod_avg(i,k,j) = 0.
         grid%rhov_avg(i,k,j) = 0.
-        grid%t_avg(i,k,j) = 0.
+        grid%rho_avg(i,k,j) = 0.
       END DO
       END DO
       END DO
@@ -101,7 +101,7 @@ CONTAINS
             grid%v3_avg(i,k,j) = 0.
             grid%w3_avg(i,k,j) = 0.
             !grid%q3_avg(i,k,j) = 0.
-            !grid%t3_avg(i,k,j) = 0.
+            !grid%ptv3_avg(i,k,j) = 0.
           END DO
           END DO
           END DO
@@ -215,7 +215,7 @@ CONTAINS
         ! Then :
         ! <x>_0 = 0.                                      -> computed in zero_statistics
         ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics (here)
-        grid%zz_avg(i,k,j)   = (local_count*grid%zz_avg(i,k,j)   +  zz )   * one_over_count_p1
+        grid%zp_avg(i,k,j)  = (local_count*grid%zp_avg(i,k,j)  +  zp )   * one_over_count_p1
         grid%u_avg(i,k,j)   = (local_count*grid%u_avg(i,k,j)   +  u )   * one_over_count_p1
         grid%v_avg(i,k,j)   = (local_count*grid%v_avg(i,k,j)   +  v )   * one_over_count_p1
         grid%w_avg(i,k,j)   = (local_count*grid%w_avg(i,k,j)   +  w )   * one_over_count_p1
