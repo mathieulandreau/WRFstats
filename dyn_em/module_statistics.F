@@ -2,7 +2,7 @@
 !
 MODULE module_statistics
 
-  USE module_model_constants, ONLY : R_v, R_d, T0, g
+  USE module_model_constants, ONLY : R_v, R_d, T0, g, rcp, p0
   USE module_domain, ONLY : domain
   USE module_state_description, ONLY : P_QV, P_QC, P_QR
 
@@ -28,7 +28,7 @@ CONTAINS
     if (output_stats > 0) then
       DO j=jts,jte
       DO i=its,ite
-        grid%mut_avg(i,j) = 0.
+        grid%mu_avg(i,j) = 0.
       ENDDO
       ENDDO
       DO j=jts,jte
@@ -44,6 +44,10 @@ CONTAINS
         grid%q_avg(i,k,j) = 0.
         grid%p_avg(i,k,j) = 0.
         grid%tke_avg(i,k,j) = 0.
+        grid%rho_avg(i,k,j) = 0.
+        grid%rhod_avg(i,k,j) = 0.
+        grid%rhov_avg(i,k,j) = 0.
+        grid%t_avg(i,k,j) = 0.
       END DO
       END DO
       END DO
@@ -68,6 +72,10 @@ CONTAINS
           grid%uq_avg(i,k,j) = 0.
           grid%vq_avg(i,k,j) = 0.
           grid%wq_avg(i,k,j) = 0.
+
+          grid%uqv_avg(i,k,j) = 0.
+          grid%vqv_avg(i,k,j) = 0.
+          grid%wqv_avg(i,k,j) = 0.
 
           grid%upt_avg(i,k,j) = 0.
           grid%vpt_avg(i,k,j) = 0.
@@ -121,15 +129,19 @@ CONTAINS
     INTEGER :: i,j,k, tke_opt
 
     REAL :: local_count, count_p1, one_over_2g, one_over_count_p1,  &
-    u,  & !destaggered u
-    v,  & !destaggered v
-    w,  & !destaggered w
-    q,  & !total mixing ratio (in fact only rain + cloud + vapor)
-    qv, & !qvapor
-    pt, & !dry theta perturbation (PT-300K)
-    ptv,& !moist theta perturbation (PTV-300K)
-    p,  & !pressure perturbation (P-PB)
-    z,  & !z perturbation (Z - PHB/g)
+    u,    & !destaggered u
+    v,    & !destaggered v
+    w,    & !destaggered w
+    q,    & !total mixing ratio (in fact only rain + cloud + vapor)
+    qv,   & !qvapor
+    pt,   & !dry theta perturbation (PT-300K)
+    ptv,  & !moist theta perturbation (PTV-300K)
+    p,    & !pressure perturbation (P-PB)
+    z,    & !z perturbation (Z - PHB/g)
+    t,    & !temperature perturbation (T-300K)
+    rhod, & !dry density
+    rhov, & !water vapor density
+    rho,  & !total density
     tke   !tke_pbl in RANS with MYJ scheme, tke_sfs for LES with TKE scheme, 0 otherwhile
 
     if (output_stats > 0) then
@@ -152,7 +164,7 @@ CONTAINS
 
       DO j=jts,jte
       DO i=its,ite
-        grid%mut_avg(i,j) = (local_count*grid%mut_avg(i,j)  +  grid%mut(i,j) ) * one_over_count_p1
+        grid%mu_avg(i,j) = (local_count*grid%mu_avg(i,j)  +  grid%mu_2(i,j) ) * one_over_count_p1
       ENDDO
       ENDDO
 
@@ -189,6 +201,11 @@ CONTAINS
         pt = grid%pt(i,k,j) !I don't know if it is dry or moist, I assume dry
         ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
+        t = (pt + T0) * (p/p0)**rcp
+        rhod = p/(R_d*t)
+        rhov = rhod*qv
+        rho = rhod*(1.0+q)
+        t = t - T0
         !The calculation of time-average values is basic :
         ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
         ! Then :
@@ -204,6 +221,10 @@ CONTAINS
         grid%q_avg(i,k,j)   = (local_count*grid%q_avg(i,k,j)   +  q )   * one_over_count_p1
         grid%p_avg(i,k,j)   = (local_count*grid%p_avg(i,k,j)   +  p )   * one_over_count_p1
         grid%tke_avg(i,k,j) = (local_count*grid%tke_avg(i,k,j) +  tke ) * one_over_count_p1
+        grid%rho_avg(i,k,j) = (local_count*grid%rho_avg(i,k,j) +  rho ) * one_over_count_p1
+        grid%rhod_avg(i,k,j)= (local_count*grid%rhod_avg(i,k,j)+  rhod )* one_over_count_p1
+        grid%rhov_avg(i,k,j)= (local_count*grid%rhov_avg(i,k,j)+  rhov )* one_over_count_p1
+        grid%t_avg(i,k,j)   = (local_count*grid%t_avg(i,k,j)   +  t )   * one_over_count_p1
         if (output_stats > 1) then
           grid%u2_avg(i,k,j)   = (local_count*grid%u2_avg(i,k,j)   +  u*u )     * one_over_count_p1
           grid%v2_avg(i,k,j)   = (local_count*grid%v2_avg(i,k,j)   +  v*v )     * one_over_count_p1
@@ -222,6 +243,10 @@ CONTAINS
           grid%uq_avg(i,k,j)   = (local_count*grid%uq_avg(i,k,j)   +  u*q )     * one_over_count_p1
           grid%vq_avg(i,k,j)   = (local_count*grid%vq_avg(i,k,j)   +  v*q )     * one_over_count_p1
           grid%wq_avg(i,k,j)   = (local_count*grid%wq_avg(i,k,j)   +  w*q )     * one_over_count_p1
+
+          grid%uqv_avg(i,k,j)  = (local_count*grid%uqv_avg(i,k,j)  +  u*qv )    * one_over_count_p1
+          grid%vqv_avg(i,k,j)  = (local_count*grid%vqv_avg(i,k,j)  +  v*qv )    * one_over_count_p1
+          grid%wqv_avg(i,k,j)  = (local_count*grid%wqv_avg(i,k,j)  +  w*qv )    * one_over_count_p1
 
           grid%upt_avg(i,k,j)  = (local_count*grid%upt_avg(i,k,j)  +  u*pt )    * one_over_count_p1
           grid%vpt_avg(i,k,j)  = (local_count*grid%vpt_avg(i,k,j)  +  v*pt )    * one_over_count_p1
