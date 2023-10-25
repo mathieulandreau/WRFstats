@@ -7,7 +7,7 @@ state   integer stats_count  -      dyn_em     -    -    r     "stats_count"  "C
 
 # Average values
 state   real    mu_avg       ij     dyn_em     1    -    h{24} "MU_AVG"       "time-avg. dry air mass perturbation in column"  "Pa"
-state   real    z_avg        ikj    dyn_em     1    -    h{24} "Z_AVG"        "time-avg. altitude perturbation on mass grid"  "m ASL"
+state   real    zp_avg       ikj    dyn_em     1    -    h{24} "ZP_AVG"       "time-avg. altitude perturbation on mass grid"  "m ASL"
 state   real    u_avg        ikj    dyn_em     1    -    h{24} "U_AVG"        "time-avg. x-wind component on mass grid"  "m s-1"
 state   real    v_avg        ikj    dyn_em     1    -    h{24} "V_AVG"        "time-avg. y-wind component on mass grid"  "m s-1"
 state   real    w_avg        ikj    dyn_em     1    -    h{24} "W_AVG"        "time-avg. z-wind component on mass grid"   "m s-1"
@@ -31,7 +31,7 @@ state   real    ptv2_avg     ikj    dyn_em     1    -    h{24} "PTV2_AVG"      "
 state   real    q2_avg       ikj    dyn_em     1    -    h{24} "Q2_AVG"        "time-avg. squared Q"  ""
 state   real    qv2_avg      ikj    dyn_em     1    -    h{24} "QV2_AVG"       "time-avg. squared QV"  ""
 #state   real    p2_avg       ikj    dyn_em     1    -    h{24} "P2_AVG"        "time-avg. squared pressure"  "Pa2"
-state   real    z2_avg       ikj    dyn_em     1    -    h{24} "Z2_AVG"        "time-avg. squared height perturbation (Z-BaseZ)"  "m2 (ASL)"
+state   real    zp2_avg      ikj    dyn_em     1    -    h{24} "ZP2_AVG"       "time-avg. squared geopotential height perturbation (Z-Z_BASE)"  "m2 (ASL)"
 
 state   real    uv_avg       ikj    dyn_em     1    -    h{24} "UV_AVG"        "time-avg. product x-wind y-wind on mass grid"  "m2 s-2"
 state   real    uw_avg       ikj    dyn_em     1    -    h{24} "UW_AVG"        "time-avg. product x-wind z-wind on mass grid"  "m2 s-2"
@@ -53,6 +53,10 @@ state   real    uptv_avg     ikj    dyn_em     1    -    h{24} "UPTV_AVG"      "
 state   real    vptv_avg     ikj    dyn_em     1    -    h{24} "VPTV_AVG"      "time-avg. product y-wind moist theta (T-300K) on mass grid"  "K m s-1"
 state   real    wptv_avg     ikj    dyn_em     1    -    h{24} "WPTV_AVG"      "time-avg. product z-wind moist theta (T-300K) on mass grid"  "K m s-1"
 
+state   real    up_avg       ikj    dyn_em     1    -    h{24} "UP_AVG"        "time-avg. product x-wind pressure perturbation (P-P_BASE) on mass grid"  "Kg s-3"
+state   real    vp_avg       ikj    dyn_em     1    -    h{24} "VP_AVG"        "time-avg. product y-wind pressure perturbation (P-P_BASE) on mass grid"  "Kg s-3"
+state   real    wp_avg       ikj    dyn_em     1    -    h{24} "WP_AVG"        "time-avg. product z-wind pressure perturbation (P-P_BASE) on mass grid"  "Kg s-3"
+
 #state   real    qvpt_avg     ikj    dyn_em     1    -    h{24} "QVPT_AVG"      "time-avg. product QV dry theta (PT-300K)"  "K"
 
 
@@ -69,10 +73,10 @@ rconfig  integer  output_stats             namelist,diag    max_domains    0    
 # Packages
 
 #mu_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg
-#u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,qvpt_avg
+#u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,qvpt_avg,up_avg,vp_avg,wp_avg
 #u3_avg,v3_avg,w3_avg 
 
-package  stats_1     output_stats==1            -  state:mu_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg
-package  stats_2     output_stats==2            -  state:mu_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg
-package  stats_3     output_stats==3            -  state:mu_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,u3_avg,v3_avg,w3_avg
+package  stats_1     output_stats==1            -  state:mu_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg
+package  stats_2     output_stats==2            -  state:mu_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg
+package  stats_3     output_stats==3            -  state:mu_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg,u3_avg,v3_avg,w3_avg
 #package  sgs_fluxes  output_sgs_fluxes          -  state:ftx_sgs_avg,fty_sgs_avg,ftz_sgs_avg,fqx_sgs_avg,fqy_sgs_avg,fqz_sgs_avg,fux_sgs_avg,fuz_sgs_avg,fvx_sgs_avg,fvy_sgs_avg,fvz_sgs_avg,fwx_sgs_avg,fwy_sgs_avg,fwz_sgs_avg 

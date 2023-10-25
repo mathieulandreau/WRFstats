@@ -34,7 +34,7 @@ CONTAINS
       DO j=jts,jte
       DO k=kts,kte
       DO i=its,ite
-        grid%z_avg(i,k,j) = 0.
+        grid%zp_avg(i,k,j) = 0.
         grid%u_avg(i,k,j) = 0.
         grid%v_avg(i,k,j) = 0.
         grid%w_avg(i,k,j) = 0.
@@ -63,7 +63,7 @@ CONTAINS
           grid%q2_avg(i,k,j) = 0.
           grid%qv2_avg(i,k,j) = 0.
           !grid%p2_avg(i,k,j) = 0.
-          grid%z2_avg(i,k,j) = 0.
+          grid%zp2_avg(i,k,j) = 0.
 
           grid%uv_avg(i,k,j) = 0.
           grid%uw_avg(i,k,j) = 0.
@@ -84,6 +84,10 @@ CONTAINS
           grid%uptv_avg(i,k,j) = 0.
           grid%vptv_avg(i,k,j) = 0.
           grid%wptv_avg(i,k,j) = 0.
+
+          grid%up_avg(i,k,j) = 0.
+          grid%vp_avg(i,k,j) = 0.
+          grid%wp_avg(i,k,j) = 0.
 
           !grid%qvpt_avg(i,k,j) = 0.
         END DO
@@ -136,8 +140,8 @@ CONTAINS
     qv,   & !qvapor
     pt,   & !dry theta perturbation (PT-300K)
     ptv,  & !moist theta perturbation (PTV-300K)
-    p,    & !pressure perturbation (P-PB)
-    z,    & !z perturbation (Z - PHB/g)
+    p,    & !pressure perturbation (P-P_BASE)
+    zp,   & !zp perturbation (PHI - PHI_BASE)/g
     t,    & !temperature perturbation (T-300K)
     rhod, & !dry density
     rhov, & !water vapor density
@@ -174,7 +178,7 @@ CONTAINS
         qv = grid%moist(i,k,j,P_QV)
         q = qv + grid%moist(i,k,j,P_QC) + grid%moist(i,k,j,P_QR) ! We don't considere ice and snow here
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
-        z = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
+        zp = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
         IF (tke_opt == 1) THEN
           tke = grid%tke_2(i,k,j)
@@ -211,7 +215,7 @@ CONTAINS
         ! Then :
         ! <x>_0 = 0.                                      -> computed in zero_statistics
         ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics (here)
-        grid%z_avg(i,k,j)   = (local_count*grid%z_avg(i,k,j)   +  z )   * one_over_count_p1
+        grid%zz_avg(i,k,j)   = (local_count*grid%zz_avg(i,k,j)   +  zz )   * one_over_count_p1
         grid%u_avg(i,k,j)   = (local_count*grid%u_avg(i,k,j)   +  u )   * one_over_count_p1
         grid%v_avg(i,k,j)   = (local_count*grid%v_avg(i,k,j)   +  v )   * one_over_count_p1
         grid%w_avg(i,k,j)   = (local_count*grid%w_avg(i,k,j)   +  w )   * one_over_count_p1
@@ -234,7 +238,7 @@ CONTAINS
           grid%q2_avg(i,k,j)   = (local_count*grid%q2_avg(i,k,j)   +  q*q )     * one_over_count_p1
           grid%qv2_avg(i,k,j)  = (local_count*grid%qv2_avg(i,k,j)  +  qv*qv )   * one_over_count_p1
           !grid%p2_avg(i,k,j)   = (local_count*grid%p2_avg(i,k,j)   +  p*p )     * one_over_count_p1
-          grid%z2_avg(i,k,j)   = (local_count*grid%z2_avg(i,k,j)   +  z*z )     * one_over_count_p1
+          grid%zp2_avg(i,k,j)   = (local_count*grid%zp2_avg(i,k,j)   +  zp*zp )     * one_over_count_p1
 
           grid%uv_avg(i,k,j)   = (local_count*grid%uv_avg(i,k,j)   +  u*v )     * one_over_count_p1
           grid%uw_avg(i,k,j)   = (local_count*grid%uw_avg(i,k,j)   +  u*w )     * one_over_count_p1
@@ -255,6 +259,11 @@ CONTAINS
           grid%uptv_avg(i,k,j) = (local_count*grid%uptv_avg(i,k,j) +  u*ptv )   * one_over_count_p1
           grid%vptv_avg(i,k,j) = (local_count*grid%vptv_avg(i,k,j) +  v*ptv )   * one_over_count_p1
           grid%wptv_avg(i,k,j) = (local_count*grid%wptv_avg(i,k,j) +  w*ptv )   * one_over_count_p1
+
+          grid%up_avg(i,k,j)   = (local_count*grid%up_avg(i,k,j)   +  u*p )     * one_over_count_p1
+          grid%vp_avg(i,k,j)   = (local_count*grid%vp_avg(i,k,j)   +  v*p )     * one_over_count_p1
+          grid%wp_avg(i,k,j)   = (local_count*grid%wp_avg(i,k,j)   +  w*p )     * one_over_count_p1
+
           if (output_stats > 2) then
             grid%u3_avg(i,k,j) = (local_count*grid%u3_avg(i,k,j)  +  u*u*u ) * one_over_count_p1
             grid%v3_avg(i,k,j) = (local_count*grid%v3_avg(i,k,j)  +  v*v*v ) * one_over_count_p1
