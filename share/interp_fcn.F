@@ -4722,7 +4722,7 @@ END MODULE module_interp_info
       real, intent(in) :: xx , yy               ! The location of the search origin 
       real, intent(in) :: msgval
       integer, intent(in), optional :: maskval
-      real, dimension(start_x:end_x, start_y:end_y, start_z:end_z), &
+      real, dimension(start_x:end_x, start_z:end_z, start_y:end_y), &
           intent(in) :: array 
        ! integer, dimension(:), intent(in) :: interp_list !ML remove this
        ! integer, dimension(:), intent(in) :: interp_opts !ML remove this
@@ -4765,17 +4765,17 @@ END MODULE module_interp_info
          j = qdata%y
 
          if (present(mask_array) .and. present(maskval) .and. present(mask_relational)) then
-            if (mask_relational == '>' .and. mask_array(i,j) <= maskval .and. array(i,j,izz) /= msgval) then
+            if (mask_relational == '>' .and. mask_array(i,j) <= maskval .and. array(i,izz,j) /= msgval) then
                found_valid = .true.
-            else if (mask_relational == '<' .and. mask_array(i,j) >= maskval .and. array(i,j,izz) /= msgval) then
+            else if (mask_relational == '<' .and. mask_array(i,j) >= maskval .and. array(i,izz,j) /= msgval) then
                found_valid = .true.
-            else if (mask_relational == ' ' .and. mask_array(i,j) /= maskval .and. array(i,j,izz) /= msgval) then
+            else if (mask_relational == ' ' .and. mask_array(i,j) /= maskval .and. array(i,izz,j) /= msgval) then
                found_valid = .true.
             end if
          else if (present(mask_array) .and. present(maskval)) then
-            if (array(i,j,izz) /= msgval .and. mask_array(i,j) /= maskval) found_valid = .true.                  
+            if (array(i,izz,j) /= msgval .and. mask_array(i,j) /= maskval) found_valid = .true.                  
          else
-            if (array(i,j,izz) /= msgval) found_valid = .true. 
+            if (array(i,izz,j) /= msgval) found_valid = .true. 
          end if
 
          if (i-1 >= start_x) then
@@ -4826,43 +4826,43 @@ END MODULE module_interp_info
   
       if (found_valid) then
          distance = (real(i)-xx)*(real(i)-xx)+(real(j)-yy)*(real(j)-yy) 
-         search_extrap = array(i,j,izz)
+         search_extrap = array(i,izz,j)
          do while (q_isdata(q))
             qdata = q_remove(q)
             if (present(mask_array) .and. present(maskval) .and. present(mask_relational)) then
                if (mask_relational == '<' .and. mask_array(qdata%x,qdata%y) >= maskval &
-                   .and. array(qdata%x,qdata%y,izz) /= msgval) then
+                   .and. array(qdata%x,izz,qdata%y) /= msgval) then
                   if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
                      distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
-                     search_extrap = array(qdata%x, qdata%y, izz)
+                     search_extrap = array(qdata%x, izz, qdata%y)
                   end if
                else if (mask_relational == '>' .and. mask_array(qdata%x,qdata%y) <= maskval &
-                        .and. array(qdata%x,qdata%y,izz) /= msgval) then
+                        .and. array(qdata%x,izz,qdata%y) /= msgval) then
                   if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
                      distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
-                     search_extrap = array(qdata%x, qdata%y, izz)
+                     search_extrap = array(qdata%x, izz, qdata%y)
                   end if
                else if (mask_relational == ' ' .and. mask_array(qdata%x,qdata%y) /= maskval &
-                        .and. array(qdata%x,qdata%y,izz) /= msgval) then
+                        .and. array(qdata%x,izz,qdata%y) /= msgval) then
                   if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
                      distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
-                     search_extrap = array(qdata%x, qdata%y, izz)
+                     search_extrap = array(qdata%x, izz, qdata%y)
                   end if
                end if
                 
             else if (present(mask_array) .and. present(maskval)) then
-               if (array(qdata%x,qdata%y,izz) /= msgval .and. mask_array(qdata%x,qdata%y) /= maskval) then
+               if (array(qdata%x,izz,qdata%y) /= msgval .and. mask_array(qdata%x,qdata%y) /= maskval) then
                   if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
                      distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
-                     search_extrap = array(qdata%x, qdata%y, izz)
+                     search_extrap = array(qdata%x, izz, qdata%y)
                   end if
                end if
                 
             else
-               if (array(qdata%x,qdata%y,izz) /= msgval) then
+               if (array(qdata%x,izz,qdata%y) /= msgval) then
                   if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
                      distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
-                     search_extrap = array(qdata%x, qdata%y, izz)
+                     search_extrap = array(qdata%x, izz, qdata%y)
                   end if
                end if
             end if
@@ -4945,7 +4945,7 @@ END MODULE module_interp_info
             real, intent(in) :: xx , yy               ! The location of the search origin 
             real, intent(in) :: msgval
             integer, intent(in), optional :: maskval
-            real, dimension(start_x:end_x, start_y:end_y, start_z:end_z), &
+            real, dimension(start_x:end_x, start_z:end_z, start_y:end_y), &
                intent(in) :: array 
             real, dimension(start_x:end_x, start_y:end_y), &
                intent(in), optional :: mask_array 
