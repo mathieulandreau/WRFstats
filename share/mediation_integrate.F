@@ -778,6 +778,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
          WRITE(message,FMT='(A,I2,A,I2,A)') '*** Initializing soil quantities in nest domain #',nest%id,&
                                      ' by horizontally interpolating parent domain #' ,parent%id, &
                                      ' after having read fine land_use data in wrfinput file. ***'
+         CALL wrf_debug ( 0 , message )
          WRITE(message,FMT='(A)') '*** WARNING : Some quantities, like snow-related, are not interpolated in (mediation_integrate) ***'
          CALL wrf_debug ( 0 , message )
          CALL get_ijk_from_grid (  nest%intermediate_grid,                   &
@@ -920,6 +921,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%lu_index, nest%lu_index,&
             nest%intermediate_grid%iswater, nest%iswater&
          )
+         WRITE(message,FMT='(A)') '*** End of interp_soil_fine_lu'
+         CALL wrf_debug ( 0 , message )
      ENDIF
 
 ! feedback, mostly for this new terrain, but it is the safe thing to do
