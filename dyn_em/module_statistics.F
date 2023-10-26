@@ -205,7 +205,7 @@ CONTAINS
         pt = grid%pt(i,k,j) !I don't know if it is dry or moist, I assume dry
         ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
-        t = (pt + T0) * (p0/p)**rcp
+        t = (pt + T0) * (p0/(p+grid%pb(i,k,j)))**rcp
         rhod = p/(R_d*t)
         rhov = rhod*qv
         rho = rhod*(1.0+q)
