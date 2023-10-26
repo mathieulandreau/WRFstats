@@ -174,6 +174,7 @@ SUBROUTINE calc_ts_locations( grid )
       
       ! Determine time series locations for domain
       IF (.NOT. grid%have_calculated_tslocs) THEN
+
          grid%have_calculated_tslocs = .TRUE.
          WRITE(message, '(A43,I3,A15,A19)') 'Computing time series locations for domain ', grid%id, &
                                             ' starting from ',simulation_start_date
