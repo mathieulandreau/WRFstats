@@ -800,7 +800,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%i_parent_start, nest%j_parent_start,&
             nest%parent_grid_ratio, nest%parent_grid_ratio,&
             nest%intermediate_grid%lu_index, nest%lu_index,&
-            nest%intermediate_grid%iswater, nest%iswater&
+            nest%intermediate_grid%iswater, nest%iswater,&
+            "TSLB"&
          )
          IF (nest_config_flags%interp_soil_fine_lu > 1) THEN
             CALL interp_mask_field_fine_lu(&
@@ -818,7 +819,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "SMOIS"&
             )
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%tsk,1)*SIZE(nest%intermediate_grid%tsk,2) .GT. 1),&
@@ -835,7 +837,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "TSK"&
             )
          END IF
          IF (nest_config_flags%interp_soil_fine_lu > 2) THEN
@@ -854,7 +857,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "SMCREL"&
             )
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%sh2o,1)*SIZE(nest%intermediate_grid%sh2o,3) .GT. 1),&
@@ -871,7 +875,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "SH2O"&
             )
          END IF
          IF (nest_config_flags%interp_soil_fine_lu > 3) THEN
@@ -890,7 +895,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "SSTSK"&
             )
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%udrunoff,1)*SIZE(nest%intermediate_grid%udrunoff,2) .GT. 1),&
@@ -907,7 +913,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "UDRUNOFF"&
             )
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%sfcrunoff,1)*SIZE(nest%intermediate_grid%sfcrunoff,2) .GT. 1),&
@@ -924,7 +931,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%i_parent_start, nest%j_parent_start,&
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater&
+               nest%intermediate_grid%iswater, nest%iswater,&
+               "SFCRUNOFF"&
             )
          END IF
          WRITE(message,FMT='(A)') '*** End of interp_soil_fine_lu'
