@@ -206,7 +206,7 @@ CONTAINS
         ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
         t = (pt + T0) * (p0/(p+grid%pb(i,k,j)))**rcp
-        rhod = p/(R_d*t)
+        rhod = (p+grid%pb(i,k,j))/(R_d*t)
         rhov = rhod*qv
         rho = rhod*(1.0+q)
         t = t - T0
