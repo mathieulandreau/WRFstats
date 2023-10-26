@@ -4916,7 +4916,7 @@ END MODULE module_interp_info
                              ipos, jpos,                           &
                              nri, nrj, cflag, nflag
       LOGICAL, INTENT(IN) :: xstag, ystag
-      CHARACTER (len=256), OPTIONAL, INTENT(IN) :: varname
+      CHARACTER (len=100), OPTIONAL, INTENT(IN) :: varname
 
       REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
       REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
@@ -4932,7 +4932,7 @@ END MODULE module_interp_info
       REAL :: avg, sum, dx , dy
       INTEGER :: icount_water(nkts:nkte), icount_land(nkts:nkte), idummy(nkts:nkte)
       REAL :: avg_water(nkts:nkte), avg_land(nkts:nkte), sum_water(nkts:nkte), sum_land(nkts:nkte), dummy(nkts:nkte)
-      CHARACTER (len=256) :: message
+      CHARACTER (len=256) :: message, wrf_err_message
       CHARACTER (len=256) :: a_mess
 
       INTERFACE

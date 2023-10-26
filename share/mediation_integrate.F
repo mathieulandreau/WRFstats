@@ -803,6 +803,11 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%iswater, nest%iswater,&
             "TSLB"&
          )
+         IF (MINVAL(nest%tslb) < 200.0) THEN
+            WRITE(message,FMT='(A)') '*** WARNING after fine_lu: wrong values in TSLB ***'
+            CALL wrf_debug ( 0 , message )
+         END IF
+
          IF (nest_config_flags%interp_soil_fine_lu > 1) THEN
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%smois,1)*SIZE(nest%intermediate_grid%smois,3) .GT. 1),&
