@@ -4982,6 +4982,7 @@ END MODULE module_interp_info
                      WRITE (wrf_err_message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
                      CALL wrf_message ( wrf_err_message )
                      cycle
+                  END IF
                   ! first coarse position equal to or to the left of nest point
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
                      ci = ( ni + (nri/2)-1 ) / nri + ipos -1
