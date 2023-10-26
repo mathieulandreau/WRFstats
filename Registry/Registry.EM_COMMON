@@ -2438,6 +2438,7 @@ rconfig   integer     irr_ph              namelist,physics      max_domains    0
 
 
 rconfig   integer     sf_surface_physics  namelist,physics	max_domains    -1      rh       "sf_surface_physics"            ""      ""
+rconfig   integer     default_soiltype    namelist,physics	1               8      rh       "default_soiltype"              "Soil category used to correct missing values (default 8 : silty clay loam)"      ""
 rconfig   integer     bl_pbl_physics      namelist,physics	max_domains    -1      rh       "bl_pbl_physics"                ""      ""
 rconfig   integer     tke_budget          namelist,physics      max_domains    0       rh       "tke_budget"                    ""      ""
 rconfig   integer     ysu_topdown_pblmix  namelist,physics      1              1       rh       "ysu_topdown_pblmix"            ""      ""
