@@ -2164,7 +2164,8 @@ rconfig   integer end_minute              namelist,time_control		max_domains    
 rconfig   integer end_second              namelist,time_control		max_domains      00    irh   "end_second"            "2 DIGIT SECOND OF THE MINUTE OF END OF MODEL, 0-59" "SECONDS"
 rconfig   integer interval_seconds        namelist,time_control		1             10800    irh   "interval_seconds"      "SECONDS BETWEEN ANALYSIS AND BOUNDARY PERIODS" "SECONDS"
 rconfig   logical input_from_file         namelist,time_control		max_domains    .false. irh    "input_from_file"      "T/F INPUT FOR THIS DOMAIN FROM A SEPARATE INPUT FILE"  ""
-rconfig   integer fine_input_stream       namelist,time_control		max_domains    0       irh    "fine_input_stream"      "0 THROUGH 11, WHAT INPUT STREAM IS FINE GRID IC FROM"  ""
+rconfig   integer fine_input_stream       namelist,time_control		max_domains    0       irh    "fine_input_stream"    "0 THROUGH 11, WHAT INPUT STREAM IS FINE GRID IC FROM"  ""
+rconfig   integer interp_soil_fine_lu     namelist,time_control		max_domains    0       irh    "interp_soil_fine_lu"  "How soil dynamic data are initialized when setting fine_input_stream=2"  ""
 rconfig   logical input_from_hires        namelist,time_control		max_domains    .false. irh    "input_from_hires"     "T/F INPUT FOR THIS DOMAIN FROM USGS HI RES TERRAIN"  ""
 rconfig   character rsmas_data_path       namelist,time_control		1              "."     -    "rsmas_data_path"      ""  ""
 rconfig   logical all_ic_times            namelist,time_control		1              .false. irh    "all_ic_times"     "T/F WRITE ALL IC TIME PERIODS"  ""
@@ -2438,6 +2439,7 @@ rconfig   integer     irr_ph              namelist,physics      max_domains    0
 
 
 rconfig   integer     sf_surface_physics  namelist,physics	max_domains    -1      rh       "sf_surface_physics"            ""      ""
+rconfig   integer     default_soiltype    namelist,physics	1               8      rh       "default_soiltype"              "Soil category used to correct missing values (default 8 : silty clay loam)"      ""
 rconfig   integer     bl_pbl_physics      namelist,physics	max_domains    -1      rh       "bl_pbl_physics"                ""      ""
 rconfig   integer     tke_budget          namelist,physics      max_domains    0       rh       "tke_budget"                    ""      ""
 rconfig   integer     ysu_topdown_pblmix  namelist,physics      1              1       rh       "ysu_topdown_pblmix"            ""      ""

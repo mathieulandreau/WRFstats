@@ -487,6 +487,19 @@
       ENDDO
 
 !-----------------------------------------------------------------------
+! Check that default_soiltype is between 1 and 19 and is not water (14)
+!-----------------------------------------------------------------------
+      IF ((model_config_rec % default_soiltype .LT. 1) &
+            .OR. (model_config_rec % default_soiltype .GT. 19) &
+            .OR. (model_config_rec % default_soiltype .EQ. 14)) THEN
+         WRITE (wrf_err_message, FMT='(A,I4,A)') '--- ERROR: invalid default_soiltype category (', model_config_rec % default_soiltype, ')'
+         CALL wrf_message ( wrf_err_message )
+         WRITE (wrf_err_message, FMT='(A)') '--- ERROR: resetting default_soiltype to 8 (silty clay loam)'
+         CALL wrf_message ( wrf_err_message )
+         model_config_rec % default_soiltype = 8
+      END IF
+
+!-----------------------------------------------------------------------
 ! Check that mosiac option cannot turn on when sf_urban_physics = 2 and 3
 !-----------------------------------------------------------------------
       DO i = 1, model_config_rec % max_dom
@@ -1005,6 +1018,23 @@
             wrf_err_message = '--- Set io_form_auxinput2 in the time_control namelist (probably to 2).'
          CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
          count_fatal_error = count_fatal_error + 1
+         END IF
+      ENDDO
+
+
+!-----------------------------------------------------------------------
+! Check that if interp_soil_fine_lu /= 0, fine_input_stream must also be in use
+!-----------------------------------------------------------------------
+
+      DO i = 1, model_config_rec % max_dom
+         IF ( .NOT. model_config_rec % grid_allowed(i) ) CYCLE
+         IF ( ( model_config_rec%interp_soil_fine_lu(i) .NE. 0 ).AND. &
+              ( model_config_rec%fine_input_stream(i) .EQ. 0 ) ) THEN
+            wrf_err_message = '--- NOTE: If interp_soil_fine_lu /= 0, fine_input_stream must be /= 0'
+            CALL wrf_debug ( wrf_err_message )
+            wrf_err_message = '--- NOTE:   ----> Resetting interp_soil_fine_lu to 0'
+            CALL wrf_debug ( 0, TRIM( wrf_err_message ) )
+            model_config_rec%interp_soil_fine_lu(i) = 0
          END IF
       ENDDO
 

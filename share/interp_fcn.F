@@ -1,3 +1,430 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Module: bitarray_module
+!
+! Purpose: This module provides a two-dimensional bit array and a set of 
+!   routines to manipulate and examine the bits of the array.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+module bitarray_module
+
+   use module_wrf_error
+
+   type bitarray
+      integer, pointer, dimension(:,:) :: iarray ! Storage array
+      integer :: nx, ny                 ! Number of bits in the x and y directions
+      integer :: x_int_dim, y_int_dim   ! Number of integers in the x and y directions
+      integer :: integer_size           ! Number of bits in an integer
+   end type bitarray
+ 
+   contains
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_create
+   !
+   ! Purpose: Allocate and initialize a bit array so that all bits are FALSE 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_create(b, i, j)
+   
+      implicit none
+  
+      ! Arguments
+      integer, intent(in) :: i, j   
+      type (bitarray), intent(out) :: b
+  
+      b%integer_size = bit_size(b%integer_size) 
+  
+      b%nx = i
+      b%ny = j
+  
+      b%x_int_dim = ceiling(real(b%nx)/real(b%integer_size))
+      b%y_int_dim = b%ny 
+
+      nullify(b%iarray)
+      allocate(b%iarray(b%x_int_dim, b%y_int_dim))
+      b%iarray = 0
+ 
+   end subroutine bitarray_create
+
+
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_copy
+   !
+   ! Purpose: Duplicate a bitarray.
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_copy(src, dst)
+   
+      implicit none
+  
+      ! Arguments
+      type (bitarray), intent(in) :: src
+      type (bitarray), intent(out) :: dst
+  
+      dst%integer_size = src%integer_size
+  
+      dst%nx = src%nx
+      dst%ny = src%ny
+  
+      dst%x_int_dim = src%x_int_dim
+      dst%y_int_dim = src%y_int_dim
+
+      allocate(dst%iarray(dst%x_int_dim, dst%y_int_dim))
+      dst%iarray = src%iarray
+ 
+   end subroutine bitarray_copy
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_set
+   !
+   ! Purpose: Set the bit located at (i,j) to TRUE
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_set(b, i, j)
+ 
+      implicit none
+  
+      ! Arguments
+      integer, intent(in) :: i, j
+      type (bitarray), intent(inout) :: b
+  
+      ! Local variables
+      integer :: n_integer, n_bit
+  
+      n_integer = ((i-1) / b%integer_size) + 1
+      n_bit = mod((i-1), b%integer_size)
+  
+      b%iarray(n_integer, j) = ibset(b%iarray(n_integer, j), n_bit) 
+ 
+   end subroutine bitarray_set
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_clear
+   !
+   ! Purpose: Set the bit located at (i,j) to FALSE 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_clear(b, i, j)
+ 
+      implicit none
+  
+      ! Arguments
+      integer, intent(in) :: i, j
+      type (bitarray), intent(inout) :: b
+  
+      ! Local variables
+      integer :: n_integer, n_bit
+  
+      n_integer = ((i-1) / b%integer_size) + 1
+      n_bit = mod((i-1), b%integer_size)
+  
+      b%iarray(n_integer, j) = ibclr(b%iarray(n_integer, j), n_bit) 
+ 
+   end subroutine bitarray_clear
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_test
+   !
+   ! Purpose: To return the value of the bit located at (i,j)
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   function bitarray_test(b, i, j)
+ 
+      implicit none
+  
+      ! Arguments
+      integer, intent(in) :: i, j
+      type (bitarray), intent(in) :: b
+  
+      ! Local variables
+      logical :: bitarray_test
+      integer :: n_integer, n_bit
+  
+      n_integer = ((i-1) / b%integer_size) + 1
+      n_bit = mod((i-1), b%integer_size)
+  
+      bitarray_test = btest(b%iarray(n_integer,j), n_bit) 
+ 
+   end function bitarray_test
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_merge
+   !
+   ! Purpose: The first bitarray argument, b1, is set to the union of the .TRUE. 
+   !   bits in b1 and b2. That is, after returning, a bit x in b1 is set if
+   !   either x was set in b1 or x was set in b2. Thus, b1 AND b2 MUST BE BIT 
+   !   ARRAYS OF THE SAME DIMENSIONS.
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_merge(b1, b2)
+ 
+      implicit none
+  
+      ! Arguments
+      type (bitarray), intent(inout) :: b1, b2
+  
+      ! Local variables
+      integer :: i, j
+  
+      if (b1%x_int_dim /= b2%x_int_dim .or. b1%y_int_dim /= b2%y_int_dim) then
+         call wrf_error_fatal('In bitarray_merge(), b1 and b2 have different dimensions.')
+      end if
+  
+      do i=1,b1%x_int_dim
+         do j=1,b1%y_int_dim
+            b1%iarray(i,j) = ior(b1%iarray(i,j), b2%iarray(i,j))  
+         end do
+      end do
+ 
+   end subroutine bitarray_merge
+   
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   ! Name: bitarray_destroy
+   !
+   ! Purpose: To deallocate all allocated memory associated with the bit array
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
+   subroutine bitarray_destroy(b)
+ 
+      implicit none
+  
+      ! Arguments
+      type (bitarray), intent(inout) :: b
+  
+      if (associated(b%iarray)) then
+         deallocate(b%iarray)
+      else
+         call wrf_message('In bitarray_destroy(), b is not allocated.')
+      end if
+ 
+   end subroutine bitarray_destroy
+ 
+end module bitarray_module
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Module: queue_module
+!
+! Description: This module implements a queue of user-defined data types and 
+!   a set of routines related to the maintenance and manipulation of the queue.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+module queue_module
+
+   use module_wrf_error
+
+   type q_data         ! The user-defined datatype to store in the queue
+      real :: lat, lon
+      integer :: x, y
+      integer :: depth ! Used by 'search' interpolation method
+      integer :: sr_x, sr_y
+      character (len=128) :: units, description, stagger
+   end type q_data
+ 
+   type q_item         ! Wrapper for item to be stored in the queue
+      type (q_data) :: data
+      type (q_item), pointer :: next
+   end type q_item
+ 
+   type queue          ! The queue object, defined by a head and tail pointer
+      type (q_item), pointer :: head, tail
+      integer :: length
+   end type queue
+
+   contains
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_init
+   !
+   ! Purpose: To initialize a queue
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   subroutine q_init(q)
+ 
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(inout) :: q
+  
+      nullify(q%head)
+      nullify(q%tail)
+      q%length = 0
+ 
+   end subroutine q_init
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_insert
+   !
+   ! Purpose: To insert an item in the tail of the queue
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   subroutine q_insert(q, qitem)
+    
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(inout) :: q
+      type (q_data), intent(in) :: qitem
+  
+      ! Local variables
+      type (q_item), pointer :: newitem
+  
+      allocate(newitem)
+      newitem%data = qitem
+      nullify(newitem%next) 
+      if (.not.associated(q%tail)) then
+         q%head=>newitem
+         q%tail=>newitem
+      else
+         q%tail%next=>newitem
+         q%tail=>newitem
+      end if
+  
+      q%length = q%length + 1
+ 
+   end subroutine q_insert
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_isdata
+   ! 
+   ! Purpose: This function returns FALSE if the queue is empty and TRUE otherwise 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   function q_isdata(q)
+ 
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(in) :: q
+  
+      ! Local variables
+      logical :: q_isdata
+  
+      q_isdata = .false.
+    
+      if (associated(q%head) .and. (q%length >= 1)) then 
+         q_isdata = .true.
+      end if
+ 
+   end function q_isdata
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_peek
+   ! 
+   ! Purpose: To return the item in the head of the queue, without
+   !    actually removing the item 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   function q_peek(q)
+ 
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(in) :: q
+  
+      ! Local variables
+      type (q_data) :: q_peek
+  
+      if (associated(q%head)) then
+         q_peek = q%head%data 
+      else
+         call wrf_error_fatal('q_peek(): Trying to peek at an empty queue')
+      end if
+ 
+   end function q_peek
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_length
+   ! 
+   ! Purpose: To return the number of items currently in the queue
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   function q_length(q)
+   
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(in) :: q
+  
+      ! Local variables
+      !    type (q_item), pointer :: cursor
+      integer :: q_length      
+  
+      q_length = q%length
+  
+      ! USE THE FOLLOWING TO COUNT THE LENGTH BY ACTUALLY TRAVERSING THE LINKED LIST
+      ! REPRESENTATION OF THE QUEUE
+      !    if (associated(q%head)) then
+      !       q_length = q_length + 1
+      !       cursor=>q%head
+      !       do while(associated(cursor%next))
+      !         cursor=>cursor%next
+      !         q_length = q_length + 1
+      !       end do
+      !    end if
+ 
+   end function q_length
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_remove
+   ! 
+   ! Purpose: To return the item stored at the head of the queue
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   function q_remove(q)
+ 
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(inout) :: q
+  
+      ! Local variables
+      type (q_data) :: q_remove
+      type (q_item), pointer :: cursor
+       
+      if (associated(q%head)) then
+         if (associated(q%head%next)) then
+            cursor=>q%head%next
+            q_remove = q%head%data
+            deallocate(q%head)
+            q%head=>cursor
+         else
+            q_remove = q%head%data
+            deallocate(q%head)
+            nullify(q%head)
+            nullify(q%tail)
+         end if 
+         q%length = q%length - 1
+      else
+         call wrf_error_fatal('q_remove(): Trying to remove from an empty queue')
+      end if
+ 
+   end function q_remove
+ 
+ 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! Name: q_destroy
+   ! 
+   ! Purpose: To free all memory allocated by the queue, thus destroying any 
+   !    items that have not been removed
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   subroutine q_destroy(q)
+ 
+      implicit none
+  
+      ! Arguments
+      type (queue), intent(inout) :: q
+  
+      ! Local variables
+      type (q_item), pointer :: cursor
+  
+      q%length = 0
+  
+      if (associated(q%head)) then
+         do while(associated(q%head%next))
+            cursor=>q%head
+            q%head=>q%head%next
+            deallocate(cursor)
+         end do
+         deallocate(q%head)
+      end if
+ 
+   end subroutine q_destroy
+
+end module queue_module
+
+
+
 MODULE module_interp_info
      INTEGER , PARAMETER :: NOT_DEFINED_YET    = 0
      INTEGER , PARAMETER :: BILINEAR           = 1
@@ -800,9 +1227,9 @@ END MODULE module_interp_info
      !                    x1    x    x2         x3
 
      lagrange_quad_avg = & 
-!      ( lagrange_quad ( x , x0, x1, x2,     y0, y1, y2     )               + &
-!        lagrange_quad ( x ,     x1, x2, x3,     y1, y2, y3 )               ) / &
-!        2.
+      !      ( lagrange_quad ( x , x0, x1, x2,     y0, y1, y2     )               + &
+      !        lagrange_quad ( x ,     x1, x2, x3,     y1, y2, y3 )               ) / &
+      !        2.
        ( lagrange_quad ( x , x0, x1, x2,     y0, y1, y2     ) * ( x2 - x  ) + &
          lagrange_quad ( x ,     x1, x2, x3,     y1, y2, y3 ) * ( x  - x1 ) ) / &
          ( x2 - x1 )
@@ -861,9 +1288,9 @@ END MODULE module_interp_info
       END IF
 
       CGLL_loc = starting_position + increments_of_CG_cells + location_of_LL_wrt_this_CG
-!      WRITE ( 6 , '(a,i4, i4, i4, i4)') 'ni   ipos nri  stag', ni, ipos, nri, istag
-!      WRITE ( 6 , '(a,i4, i4, i4, i4)') 'strt inc  loc  CGLL', starting_position , increments_of_CG_cells , location_of_LL_wrt_this_CG , CGLL_loc
-!      print *,' '
+      !      WRITE ( 6 , '(a,i4, i4, i4, i4)') 'ni   ipos nri  stag', ni, ipos, nri, istag
+      !      WRITE ( 6 , '(a,i4, i4, i4, i4)') 'strt inc  loc  CGLL', starting_position , increments_of_CG_cells , location_of_LL_wrt_this_CG , CGLL_loc
+      !      print *,' '
 
    END FUNCTION compute_CGLL
 
@@ -932,8 +1359,8 @@ END MODULE module_interp_info
      nrjo2 = nrj/2
 
      nfx = nri * nrj
-   !$OMP PARALLEL DO   &
-   !$OMP PRIVATE ( i,j,k,ni,nj,ci,cj,ip,jp,nk,ck,nf,icmask,psca )
+     !$OMP PARALLEL DO   &
+     !$OMP PRIVATE ( i,j,k,ni,nj,ci,cj,ip,jp,nk,ck,nf,icmask,psca )
      DO k = ckts, ckte
         icmask = .FALSE.
         DO nf = 1,nfx
@@ -963,10 +1390,10 @@ END MODULE module_interp_info
            ENDDO              ! j
         ENDDO                 ! nf
 
-! tile dims in this call to sint are 1-over to account for the fact
-! that the number of cells on the nest local subdomain is not 
-! necessarily a multiple of the nest ratio in a given dim.
-! this could be a little less ham-handed.
+      ! tile dims in this call to sint are 1-over to account for the fact
+      ! that the number of cells on the nest local subdomain is not 
+      ! necessarily a multiple of the nest ratio in a given dim.
+      ! this could be a little less ham-handed.
 
         CALL sint( psca,                     &
                    cims, cime, cjms, cjme, icmask,   &
@@ -988,7 +1415,7 @@ END MODULE module_interp_info
            ENDDO
         ENDDO
      ENDDO
-   !$OMP END PARALLEL DO
+    !$OMP END PARALLEL DO
 
    END SUBROUTINE interp_fcn_sint
 
@@ -1071,7 +1498,7 @@ END MODULE module_interp_info
                               cmin_p,nmin_p,                        &  ! min pressure (Pa) in column, want CG value
                               zn, p_top                             )  ! eta levels
      USE module_timing
-!    USE module_configure
+      !    USE module_configure
      USE module_model_constants , ONLY : g , r_d, cp, p1000mb, t0
 
      IMPLICIT NONE
@@ -1476,42 +1903,42 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(nri*nrj) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                   cfld( ci, ck, cj ) =  1./9. * &
-!                                         ( nfld( ni-1, nk , nj-1) + &
-!                                           nfld( ni  , nk , nj-1) + &
-!                                           nfld( ni+1, nk , nj-1) + &
-!                                           nfld( ni-1, nk , nj  ) + &
-!                                           nfld( ni  , nk , nj  ) + &
-!                                           nfld( ni+1, nk , nj  ) + &
-!                                           nfld( ni-1, nk , nj+1) + &
-!                                           nfld( ni  , nk , nj+1) + &
-!                                           nfld( ni+1, nk , nj+1) )
-!                   cfld( ci, ck, cj ) =  1./25. * &
-!                                         ( nfld( ni-2, nk , nj-2) + &
-!                                           nfld( ni-2, nk , nj-1) + &
-!                                           nfld( ni-2, nk , nj-0) + &
-!                                           nfld( ni-2, nk , nj+1) + &
-!                                           nfld( ni-2, nk , nj+2) + &
-!                                           nfld( ni-1, nk , nj-2) + &
-!                                           nfld( ni-1, nk , nj-1) + &
-!                                           nfld( ni-1, nk , nj-0) + &
-!                                           nfld( ni-1, nk , nj+1) + &
-!                                           nfld( ni-1, nk , nj+2) + &
-!                                           nfld( ni-0, nk , nj-2) + &
-!                                           nfld( ni-0, nk , nj-1) + &
-!                                           nfld( ni-0, nk , nj-0) + &
-!                                           nfld( ni-0, nk , nj+1) + &
-!                                           nfld( ni-0, nk , nj+2) + &
-!                                           nfld( ni+1, nk , nj-2) + &
-!                                           nfld( ni+1, nk , nj-1) + &
-!                                           nfld( ni+1, nk , nj-0) + &
-!                                           nfld( ni+1, nk , nj+1) + &
-!                                           nfld( ni+1, nk , nj+2) + &
-!                                           nfld( ni+2, nk , nj-2) + &
-!                                           nfld( ni+2, nk , nj-1) + &
-!                                           nfld( ni+2, nk , nj-0) + &
-!                                           nfld( ni+2, nk , nj+1) + &
-!                                           nfld( ni+2, nk , nj+2) )
+      !                   cfld( ci, ck, cj ) =  1./9. * &
+      !                                         ( nfld( ni-1, nk , nj-1) + &
+      !                                           nfld( ni  , nk , nj-1) + &
+      !                                           nfld( ni+1, nk , nj-1) + &
+      !                                           nfld( ni-1, nk , nj  ) + &
+      !                                           nfld( ni  , nk , nj  ) + &
+      !                                           nfld( ni+1, nk , nj  ) + &
+      !                                           nfld( ni-1, nk , nj+1) + &
+      !                                           nfld( ni  , nk , nj+1) + &
+      !                                           nfld( ni+1, nk , nj+1) )
+      !                   cfld( ci, ck, cj ) =  1./25. * &
+      !                                         ( nfld( ni-2, nk , nj-2) + &
+      !                                           nfld( ni-2, nk , nj-1) + &
+      !                                           nfld( ni-2, nk , nj-0) + &
+      !                                           nfld( ni-2, nk , nj+1) + &
+      !                                           nfld( ni-2, nk , nj+2) + &
+      !                                           nfld( ni-1, nk , nj-2) + &
+      !                                           nfld( ni-1, nk , nj-1) + &
+      !                                           nfld( ni-1, nk , nj-0) + &
+      !                                           nfld( ni-1, nk , nj+1) + &
+      !                                           nfld( ni-1, nk , nj+2) + &
+      !                                           nfld( ni-0, nk , nj-2) + &
+      !                                           nfld( ni-0, nk , nj-1) + &
+      !                                           nfld( ni-0, nk , nj-0) + &
+      !                                           nfld( ni-0, nk , nj+1) + &
+      !                                           nfld( ni-0, nk , nj+2) + &
+      !                                           nfld( ni+1, nk , nj-2) + &
+      !                                           nfld( ni+1, nk , nj-1) + &
+      !                                           nfld( ni+1, nk , nj-0) + &
+      !                                           nfld( ni+1, nk , nj+1) + &
+      !                                           nfld( ni+1, nk , nj+2) + &
+      !                                           nfld( ni+2, nk , nj-2) + &
+      !                                           nfld( ni+2, nk , nj-1) + &
+      !                                           nfld( ni+2, nk , nj-0) + &
+      !                                           nfld( ni+2, nk , nj+1) + &
+      !                                           nfld( ni+2, nk , nj+2) )
                  ENDDO
               ENDDO
            ENDDO
@@ -1530,10 +1957,10 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(nri    ) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                   cfld( ci, ck, cj ) =  1./3. * &
-!                                         ( nfld( ni  , nk , nj-1) + &
-!                                           nfld( ni  , nk , nj  ) + &
-!                                           nfld( ni  , nk , nj+1) )
+      !                   cfld( ci, ck, cj ) =  1./3. * &
+      !                                         ( nfld( ni  , nk , nj-1) + &
+      !                                           nfld( ni  , nk , nj  ) + &
+      !                                           nfld( ni  , nk , nj+1) )
                  ENDDO
               ENDDO
            ENDDO
@@ -1552,10 +1979,10 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(    nrj) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                   cfld( ci, ck, cj ) =  1./3. * &
-!                                         ( nfld( ni-1, nk , nj  ) + &
-!                                           nfld( ni  , nk , nj  ) + &
-!                                           nfld( ni+1, nk , nj  ) )
+      !                   cfld( ci, ck, cj ) =  1./3. * &
+      !                                         ( nfld( ni-1, nk , nj  ) + &
+      !                                           nfld( ni  , nk , nj  ) + &
+      !                                           nfld( ni+1, nk , nj  ) )
                  ENDDO
               ENDDO
            ENDDO
@@ -1584,48 +2011,48 @@ END MODULE module_interp_info
         !  the ijpoints loop).  The feedback value to the CG is the arithmetic mean of 
         !  all of the FG values within each CG cell.
 
-!              |-------------||-------------|                          |-------------||-------------|
-!              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-! jpos+        |             ||             |                          |             ||             |
-! (njde-njds)- |      T      ||      T      |                          |      T      ||      T      |
-! jstag        |             ||             |                          |             ||             |
-!              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!              |-------------||-------------|                          |-------------||-------------|
-!              |-------------||-------------|                          |-------------||-------------|
-!              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!              |             ||             |                          |             ||             |
-!              |      T      ||      T      |                          |      T      ||      T      |
-!              |             ||             |                          |             ||             |
-!              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!              |-------------||-------------|                          |-------------||-------------|
-!
-!                   ...
-!                   ...
-!                   ...
-!                   ...
-!                   ...
+      !              |-------------||-------------|                          |-------------||-------------|
+      !              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      ! jpos+        |             ||             |                          |             ||             |
+      ! (njde-njds)- |      T      ||      T      |                          |      T      ||      T      |
+      ! jstag        |             ||             |                          |             ||             |
+      !              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !              |-------------||-------------|                          |-------------||-------------|
+      !              |-------------||-------------|                          |-------------||-------------|
+      !              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !              |             ||             |                          |             ||             |
+      !              |      T      ||      T      |                          |      T      ||      T      |
+      !              |             ||             |                          |             ||             |
+      !              |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !              |-------------||-------------|                          |-------------||-------------|
+      !
+      !                   ...
+      !                   ...
+      !                   ...
+      !                   ...
+      !                   ...
 
-!              |-------------||-------------|                          |-------------||-------------|
-! jpoints = 1  |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!              |             ||             |                          |             ||             |
-!              |      T      ||      T      |                          |      T      ||      T      |
-!              |             ||             |                          |             ||             |
-! jpoints = 0, |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!  nj=3        |-------------||-------------|                          |-------------||-------------|
-!              |-------------||-------------|                          |-------------||-------------|
-! jpoints = 1  |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
-!              |             ||             |                          |             ||             |
-!    jpos -->  |      T      ||      T      |          ...             |      T      ||      T      |
-!              |             ||             |          ...             |             ||             |
-! jpoints = 0, |  t      t   ||  t      t   |          ...             |  t      t   ||  t      t   |
-!  nj=1        |-------------||-------------|                          |-------------||-------------|
-!                     ^                                                                      ^
-!                     |                                                                      |
-!                     |                                                                      |
-!                   ipos                                                                   ipos+
-!     ni =        1              3                                                         (nide-nids)/nri
-! ipoints=        0      1       0      1                                                  -istag
-!
+      !              |-------------||-------------|                          |-------------||-------------|
+      ! jpoints = 1  |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !              |             ||             |                          |             ||             |
+      !              |      T      ||      T      |                          |      T      ||      T      |
+      !              |             ||             |                          |             ||             |
+      ! jpoints = 0, |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !  nj=3        |-------------||-------------|                          |-------------||-------------|
+      !              |-------------||-------------|                          |-------------||-------------|
+      ! jpoints = 1  |  t      t   ||  t      t   |                          |  t      t   ||  t      t   |
+      !              |             ||             |                          |             ||             |
+      !    jpos -->  |      T      ||      T      |          ...             |      T      ||      T      |
+      !              |             ||             |          ...             |             ||             |
+      ! jpoints = 0, |  t      t   ||  t      t   |          ...             |  t      t   ||  t      t   |
+      !  nj=1        |-------------||-------------|                          |-------------||-------------|
+      !                     ^                                                                      ^
+      !                     |                                                                      |
+      !                     |                                                                      |
+      !                   ipos                                                                   ipos+
+      !     ni =        1              3                                                         (nide-nids)/nri
+      ! ipoints=        0      1       0      1                                                  -istag
+      !
 
            !  For performance benefits, users can comment out the inner most loop (and cfld=0) and
            !  hardcode the loop feedback.  For example, it is set up to run a 2::1 ratio
@@ -1653,11 +2080,11 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(nri*nrj) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                   cfld( ci, ck, cj ) =  1./4. * &
-!                                         ( nfld( ni  , nk , nj  ) + &
-!                                           nfld( ni+1, nk , nj  ) + &
-!                                           nfld( ni  , nk , nj+1) + &
-!                                           nfld( ni+1, nk , nj+1) )
+      !                   cfld( ci, ck, cj ) =  1./4. * &
+      !                                         ( nfld( ni  , nk , nj  ) + &
+      !                                           nfld( ni+1, nk , nj  ) + &
+      !                                           nfld( ni  , nk , nj+1) + &
+      !                                           nfld( ni+1, nk , nj+1) )
                  END DO
               END DO
            END DO
@@ -1665,32 +2092,32 @@ END MODULE module_interp_info
         !  U
 
         ELSE IF ( (       xstag ) .AND. ( .NOT. ystag ) ) THEN
-!              |---------------|
-!              |               |
-! jpoints = 1  u       u       |
-!              |               |
-!              U               |
-!              |               |
-! jpoints = 0, u       u       |
-!  nj=3        |               |
-!              |---------------|
-!              |---------------|
-!              |               |
-! jpoints = 1  u       u       |
-!              |               |
-!    jpos      U               |
-!              |               |
-! jpoints = 0, u       u       |
-! nj=1         |               |
-!              |---------------|
-! 
-!              ^               
-!              |              
-!              |             
-!            ipos           
-!     ni =     1               3
-! ipoints=     0       1       0 
-!
+      !              |---------------|
+      !              |               |
+      ! jpoints = 1  u       u       |
+      !              |               |
+      !              U               |
+      !              |               |
+      ! jpoints = 0, u       u       |
+      !  nj=3        |               |
+      !              |---------------|
+      !              |---------------|
+      !              |               |
+      ! jpoints = 1  u       u       |
+      !              |               |
+      !    jpos      U               |
+      !              |               |
+      ! jpoints = 0, u       u       |
+      ! nj=1         |               |
+      !              |---------------|
+      ! 
+      !              ^               
+      !              |              
+      !              |             
+      !            ipos           
+      !     ni =     1               3
+      ! ipoints=     0       1       0 
+      !
 
            DO cj = MAX(jpos+spec_zone,cjts),MIN(jpos+(njde-njds)/nrj-jstag-spec_zone,cjte)
               nj = (cj-jpos)*nrj + 1
@@ -1705,9 +2132,9 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(nri    ) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                cfld( ci, ck, cj ) =  1./2. * &
-!                                      ( nfld( ni  , nk , nj  ) + &
-!                                        nfld( ni  , nk , nj+1) )
+      !                cfld( ci, ck, cj ) =  1./2. * &
+      !                                      ( nfld( ni  , nk , nj  ) + &
+      !                                        nfld( ni  , nk , nj+1) )
                  ENDDO
               ENDDO
            ENDDO
@@ -1728,9 +2155,9 @@ END MODULE module_interp_info
                        cfld( ci, ck, cj ) =  cfld( ci, ck, cj ) + &
                                              1./REAL(nri    ) * nfld( ni+ipoints , nk , nj+jpoints )
                     END DO
-!                cfld( ci, ck, cj ) =  1./2. * &
-!                                      ( nfld( ni  , nk , nj  ) + &
-!                                        nfld( ni+1, nk , nj  ) )
+         !                cfld( ci, ck, cj ) =  1./2. * &
+         !                                      ( nfld( ni  , nk , nj  ) + &
+         !                                        nfld( ni+1, nk , nj  ) )
                  ENDDO
               ENDDO
            ENDDO
@@ -1915,51 +2342,51 @@ END MODULE module_interp_info
 					 cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c,   &  ! coarse grid extrapolation constants
                                          alt_u_c, alt_u_n)
 
-!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
+      !KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
 
-   IMPLICIT NONE
-   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
-   INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
-                          ims, ime, kms, kme, jms, jme,   &
-                          its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
-   REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
-   REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
+      IMPLICIT NONE
+      REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
+      INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
+                           ims, ime, kms, kme, jms, jme,   &
+                           its, ite, kts, kte, jts, jte
+      INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+      REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
+      REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
 
-   
-   !local
-   
-   INTEGER :: i,j,k
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
-   REAL, DIMENSION(kde+1) :: pro_u_n
-   
-   DO j = jms,jme
-   DO i = ims,ime
-   
-      ! pro_u_c is u on the 1D coarse grid 
-    
-      do k = pgrid_s_vert,pgrid_e_vert-1
-      pro_u_c(k+1) = cfld(i,k,j)
-      enddo 
       
-      !KAL fill in the surface value and the top value using extrapolation
-
-      pro_u_c(1      ) = cf1_c*cfld(i,1,j) &
-                       + cf2_c*cfld(i,2,j) &
-                       + cf3_c*cfld(i,3,j)
-   
-      pro_u_c(pgrid_e_vert+1) = cfn_c *cfld(i,pgrid_e_vert-1,j) &
-                              + cfn1_c*cfld(i,pgrid_e_vert-2,j)  
-		       
-      call inter_wrf_copy(pro_u_c, alt_u_c, pgrid_e_vert+1, pro_u_n, alt_u_n, kde+1)
+      !local
       
-      do k = 1,kde-1
-         cfld(i,k,j) = pro_u_n(k+1)
-      enddo	
-            
-   ENDDO
-   ENDDO
+      INTEGER :: i,j,k
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
+      REAL, DIMENSION(kde+1) :: pro_u_n
+      
+      DO j = jms,jme
+      DO i = ims,ime
+      
+         ! pro_u_c is u on the 1D coarse grid 
+      
+         do k = pgrid_s_vert,pgrid_e_vert-1
+         pro_u_c(k+1) = cfld(i,k,j)
+         enddo 
+         
+         !KAL fill in the surface value and the top value using extrapolation
+
+         pro_u_c(1      ) = cf1_c*cfld(i,1,j) &
+                        + cf2_c*cfld(i,2,j) &
+                        + cf3_c*cfld(i,3,j)
+      
+         pro_u_c(pgrid_e_vert+1) = cfn_c *cfld(i,pgrid_e_vert-1,j) &
+                                 + cfn1_c*cfld(i,pgrid_e_vert-2,j)  
+               
+         call inter_wrf_copy(pro_u_c, alt_u_c, pgrid_e_vert+1, pro_u_n, alt_u_n, kde+1)
+         
+         do k = 1,kde-1
+            cfld(i,k,j) = pro_u_n(k+1)
+         enddo	
+               
+      ENDDO
+      ENDDO
   
    
    END SUBROUTINE vert_interp_vert_nesting
@@ -1973,43 +2400,41 @@ END MODULE module_interp_info
                                            pgrid_s_vert, pgrid_e_vert,           &  ! vertical dimensions of parent grid
                                            alt_w_c, alt_w_n)
 
-!KAL vertical interpolation at w points for vertical nesting
+      !KAL vertical interpolation at w points for vertical nesting
 
-   IMPLICIT NONE
-   REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
-   INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
-                          ims, ime, kms, kme, jms, jme,   &
-                          its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert), INTENT(IN) :: alt_w_c
-   REAL, DIMENSION(kde), INTENT(IN) :: alt_w_n
+      IMPLICIT NONE
+      REAL, DIMENSION ( ims:ime, kms:kme, jms:jme ), INTENT(INOUT) :: cfld   
+      INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
+                           ims, ime, kms, kme, jms, jme,   &
+                           its, ite, kts, kte, jts, jte
+      INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert), INTENT(IN) :: alt_w_c
+      REAL, DIMENSION(kde), INTENT(IN) :: alt_w_n
 
-   
-   !local
-   
-   INTEGER :: i,j,k
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert) :: pro_w_c           ! variable in 1D on the coarse grid
-   REAL, DIMENSION(kde) :: pro_w_n
-   
-   DO j = jms,jme
-   DO i = ims,ime
-   
-      ! pro_w_c is w on the 1D coarse grid 
-    
-      do k = pgrid_s_vert,pgrid_e_vert
-      pro_w_c(k) = cfld(i,k,j)
-      enddo 
-	       
-      call inter_wrf_copy(pro_w_c, alt_w_c, pgrid_e_vert, pro_w_n, alt_w_n, kde)
       
-      do k = 1,kde
-         cfld(i,k,j) = pro_w_n(k)
-      enddo	
+      !local
+      
+      INTEGER :: i,j,k
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert) :: pro_w_c           ! variable in 1D on the coarse grid
+      REAL, DIMENSION(kde) :: pro_w_n
+      
+      DO j = jms,jme
+      DO i = ims,ime
+      
+         ! pro_w_c is w on the 1D coarse grid 
+      
+         do k = pgrid_s_vert,pgrid_e_vert
+         pro_w_c(k) = cfld(i,k,j)
+         enddo 
             
-   ENDDO
-   ENDDO
-  
-   
+         call inter_wrf_copy(pro_w_c, alt_w_c, pgrid_e_vert, pro_w_n, alt_w_n, kde)
+         
+         do k = 1,kde
+            cfld(i,k,j) = pro_w_n(k)
+         enddo	
+               
+      ENDDO
+      ENDDO
    END SUBROUTINE vert_interp_vert_nesting_w
 
 !-----------------------------------------------------------------------------------------   
@@ -2022,28 +2447,28 @@ END MODULE module_interp_info
 					    cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c,   &  ! coarse grid extrapolation constants
                                             alt_u_c, alt_u_n)
 
-!KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
+      !KAL vertical interpolation for u, v, and mass points (w is below in a different subroutine) for vertical nesting 
 
-   IMPLICIT NONE
-   REAL, DIMENSION (kms:kme),INTENT(INOUT) :: cfld   
-   INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
-                          ims, ime, kms, kme, jms, jme,   &
-                          its, ite, kts, kte, jts, jte
-   INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
-   REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
-   REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
+      IMPLICIT NONE
+      REAL, DIMENSION (kms:kme),INTENT(INOUT) :: cfld   
+      INTEGER, INTENT(IN) :: ids, ide, kds, kde, jds, jde,   &
+                           ims, ime, kms, kme, jms, jme,   &
+                           its, ite, kts, kte, jts, jte
+      INTEGER, INTENT(IN) :: pgrid_s_vert, pgrid_e_vert                ! vertical dimensions of the parent grid			  
+      REAL, INTENT(IN)    :: cf1_c, cf2_c, cf3_c, cfn_c, cfn1_c
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1), INTENT(IN) :: alt_u_c
+      REAL, DIMENSION(kde+1), INTENT(IN) :: alt_u_n
 
-   
-   !local
-   
-   INTEGER :: i,j,k
-   REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
-   REAL, DIMENSION(kde+1) :: pro_u_n
+      
+      !local
+      
+      INTEGER :: i,j,k
+      REAL, DIMENSION(pgrid_s_vert:pgrid_e_vert+1) :: pro_u_c           ! variable in 1D on the coarse grid
+      REAL, DIMENSION(kde+1) :: pro_u_n
    
 
       ! pro_u_c is u on the 1D coarse grid 
-    
+   
       do k = pgrid_s_vert,pgrid_e_vert-1
       pro_u_c(k+1) = cfld(k)
       enddo 
@@ -2051,12 +2476,12 @@ END MODULE module_interp_info
       !KAL fill in the surface value and the top value using extrapolation
 
       pro_u_c(1      ) = cf1_c*cfld(1) &
-                       + cf2_c*cfld(2) &
-                       + cf3_c*cfld(3)
+                     + cf2_c*cfld(2) &
+                     + cf3_c*cfld(3)
    
       pro_u_c(pgrid_e_vert+1) = cfn_c *cfld(pgrid_e_vert-1) &
                               + cfn1_c*cfld(pgrid_e_vert-2)  
-		       
+            
       call inter_wrf_copy(pro_u_c, alt_u_c, pgrid_e_vert+1, pro_u_n, alt_u_n, kde+1)
       
       do k = 1,kde-1
@@ -2072,7 +2497,7 @@ END MODULE module_interp_info
 
   SUBROUTINE inter_wrf_copy(pro_c,alt_c,kde_c,pro_n,alt_n,kde_n)
   
-!KAL this routine has been added for vertical nesting  
+   !KAL this routine has been added for vertical nesting  
 
    IMPLICIT NONE
    INTEGER , INTENT(IN) :: kde_c,kde_n
@@ -2108,9 +2533,9 @@ END MODULE module_interp_info
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
 !KAL this is a direct copy of a subroutine from ndown, but a dependency on ndown will not work because it is not always compiled (for ideal cases), and most likely not compliled in the order needed.
 
-     subroutine  coeff_mon_wrf_copy(x,y,a,b,c,d,n)
+   subroutine  coeff_mon_wrf_copy(x,y,a,b,c,d,n)
      
-!KAL this routine has been added for vertical nesting     
+      !KAL this routine has been added for vertical nesting     
 
       implicit none
 
@@ -2136,7 +2561,7 @@ END MODULE module_interp_info
       do i=1,n
       yp(i) = p(i)
       enddo
-!!!!!!!!!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!
 
       do i=2,n-1
       yp(i) = (sign(1.,s(i-1))+sign(1.,s(i)))* min( abs(s(i-1)),abs(s(i)),0.5*abs(p(i)))
@@ -2149,9 +2574,9 @@ END MODULE module_interp_info
       d(i) = y(i)
       enddo
 
-      end  subroutine  coeff_mon_wrf_copy
+   end  subroutine  coeff_mon_wrf_copy
       
-  !-----------------------------------------------------------------------------------------
+!-----------------------------------------------------------------------------------------
   
 
 !================================== 
@@ -2220,25 +2645,25 @@ END MODULE module_interp_info
                            xstag, ystag,                         &  ! staggering of field
                            ipos, jpos,                           &  ! Position of lower left of nest in CD
                            nri, nrj,                             &  ! nest ratios
-!                          cbdy_xs, nbdy_xs,                           &
-!                          cbdy_xe, nbdy_xe,                           &
-!                          cbdy_ys, nbdy_ys,                           &
-!                          cbdy_ye, nbdy_ye,                           &
-!                          cbdy_txs, nbdy_txs,                       &
-!                          cbdy_txe, nbdy_txe,                       &
-!                          cbdy_tys, nbdy_tys,                       &
-!                          cbdy_tye, nbdy_tye,                       &
-                           parent_id,nest_id                        &!cyl    
+      !                          cbdy_xs, nbdy_xs,                           &
+      !                          cbdy_xe, nbdy_xe,                           &
+      !                          cbdy_ys, nbdy_ys,                           &
+      !                          cbdy_ye, nbdy_ye,                           &
+      !                          cbdy_txs, nbdy_txs,                       &
+      !                          cbdy_txe, nbdy_txe,                       &
+      !                          cbdy_tys, nbdy_tys,                       &
+      !                          cbdy_tye, nbdy_tye,                       &
+                                 parent_id,nest_id                        &!cyl    
                            )   ! boundary arrays
      USE module_configure
      IMPLICIT NONE
 
-!------------------------------------------------------------
-! Subroutine c2f_interp interpolate field from coarse resolution domain
-! to its nested domain. It is written by Dave Gill in NCAR for the purpose 
-! running phys/module_sf_oml.F-DPWP in only d01 and d02 
-!                                       Chiaying Lee RSMAS/UM
-!------------------------------------------------------------
+      !------------------------------------------------------------
+      ! Subroutine c2f_interp interpolate field from coarse resolution domain
+      ! to its nested domain. It is written by Dave Gill in NCAR for the purpose 
+      ! running phys/module_sf_oml.F-DPWP in only d01 and d02 
+      !                                       Chiaying Lee RSMAS/UM
+      !------------------------------------------------------------
                             
      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
                             cims, cime, ckms, ckme, cjms, cjme,   &
@@ -2255,10 +2680,10 @@ END MODULE module_interp_info
      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
-!    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_xs, cbdy_txs, nbdy_xs, nbdy_txs
-!    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_xe, cbdy_txe, nbdy_xe, nbdy_txe
-!    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ys, cbdy_tys, nbdy_ys, nbdy_tys
-!    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ye, cbdy_tye, nbdy_ye, nbdy_tye
+      !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_xs, cbdy_txs, nbdy_xs, nbdy_txs
+      !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_xe, cbdy_txe, nbdy_xe, nbdy_txe
+      !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ys, cbdy_tys, nbdy_ys, nbdy_tys
+      !    REAL,  DIMENSION( * ), INTENT(INOUT) :: cbdy_ye, cbdy_tye, nbdy_ye, nbdy_tye
      REAL cdt, ndt
      
      ! Local
@@ -2268,11 +2693,11 @@ END MODULE module_interp_info
      ! Iterate over the ND tile and compute the values
      ! from the CD tile. 
 
-!write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
-!write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
-!     write(0,*)'cyl parentid',parent_id
-!     write(0,*)'cyl nestid',nest_id
-!     If ( nest_id .le. 2 .and. (1.0/rdx .ge. 3000.0 .and. 1.0/rdy .ge. 3000.0)  ) then ! cyl: only run it in the nest domain with dx, dy < 3 km
+      !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
+      !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
+      !     write(0,*)'cyl parentid',parent_id
+      !     write(0,*)'cyl nestid',nest_id
+      !     If ( nest_id .le. 2 .and. (1.0/rdx .ge. 3000.0 .and. 1.0/rdy .ge. 3000.0)  ) then ! cyl: only run it in the nest domain with dx, dy < 3 km
      If ( nest_id .eq. 3 ) then 
      DO nj = njts, njte
      
@@ -2445,7 +2870,7 @@ END MODULE module_interp_info
                            cdt, ndt                              &
                                         )
 
-!    USE module_configure , ONLY : nl_get_spec_zone, nl_get_relax_zone
+      !    USE module_configure , ONLY : nl_get_spec_zone, nl_get_relax_zone
      USE module_state_description
 
      IMPLICIT NONE
@@ -2493,7 +2918,7 @@ END MODULE module_interp_info
      INTEGER n2ci,n
      INTEGER n2cj
 
-! statement functions for converting a nest index to coarse
+      ! statement functions for converting a nest index to coarse
      n2ci(n) = (n+ipos*nri-1)/nri
      n2cj(n) = (n+jpos*nrj-1)/nrj
 
@@ -2518,8 +2943,8 @@ END MODULE module_interp_info
 
      nfx = nri * nrj
 
-   !$OMP PARALLEL DO   &
-   !$OMP PRIVATE ( i,j,k,ni,nj,ni1,nj1,ci,cj,ip,jp,nk,ck,nf,icmask,psca,psca1 )
+    !$OMP PARALLEL DO   &
+    !$OMP PRIVATE ( i,j,k,ni,nj,ni1,nj1,ci,cj,ip,jp,nk,ck,nf,icmask,psca,psca1 )
      DO k = ckts, ckte
 
         DO nf = 1,nfx
@@ -2531,28 +2956,28 @@ END MODULE module_interp_info
               ENDDO
            ENDDO
         ENDDO
-! hopefully less ham handed but still correct and more efficient
-! sintb ignores icmask so it does not matter that icmask is not set
-!
-! SOUTH BDY
+      ! hopefully less ham handed but still correct and more efficient
+      ! sintb ignores icmask so it does not matter that icmask is not set
+      !
+      ! SOUTH BDY
                IF   ( njts .ge. njds .and. njts .le. njds + sz + joff  ) THEN
         CALL sintb( psca1, psca,                     &
           cims, cime, cjms, cjme, icmask,  &
           n2ci(nits)-1, n2ci(nite)+1, n2cj(MAX(njts,njds)), n2cj(MIN(njte,njds+sz+joff)), nrj*nri, xstag, ystag )
                ENDIF
-! NORTH BDY
+      ! NORTH BDY
                IF   ( njte .le. njde .and. njte .ge. njde - sz - joff ) THEN
         CALL sintb( psca1, psca,                     &
           cims, cime, cjms, cjme, icmask,  &
           n2ci(nits)-1, n2ci(nite)+1, n2cj(MAX(njts,njde-sz-joff)), n2cj(MIN(njte,njde-1+joff)), nrj*nri, xstag, ystag )
                ENDIF
-! WEST BDY
+      ! WEST BDY
                IF   ( nits .ge. nids .and. nits .le. nids + sz + ioff  ) THEN
         CALL sintb( psca1, psca,                     &
           cims, cime, cjms, cjme, icmask,  &
           n2ci(MAX(nits,nids)), n2ci(MIN(nite,nids+sz+ioff)), n2cj(njts)-1, n2cj(njte)+1, nrj*nri, xstag, ystag )
                ENDIF
-! EAST BDY
+      ! EAST BDY
                IF   ( nite .le. nide .and. nite .ge. nide - sz - ioff ) THEN
         CALL sintb( psca1, psca,                     &
           cims, cime, cjms, cjme, icmask,  &
@@ -2575,9 +3000,9 @@ END MODULE module_interp_info
                   CYCLE
                END IF
 
-!bdy contains the value at t-dt. psca contains the value at t
-!compute dv/dt and store in bdy_t
-!afterwards store the new value of v at t into bdy
+      !bdy contains the value at t-dt. psca contains the value at t
+      !compute dv/dt and store in bdy_t
+      !afterwards store the new value of v at t into bdy
         ! WEST
                IF   ( ni .ge. nids .and. ni .lt. nids + sz ) THEN
                  bdy_txs( nj,k,ni ) = rdt*(psca(ci+shw,cj+shw,ip+1+(jp)*nri)-nfld(ni,k,nj))
@@ -2619,7 +3044,7 @@ END MODULE module_interp_info
            ENDDO
         ENDDO
      ENDDO
-   !$OMP END PARALLEL DO
+     !$OMP END PARALLEL DO
                   
      RETURN
 
@@ -2652,8 +3077,8 @@ END MODULE module_interp_info
                            cdt, ndt                              &
                                                                  )
 
-!    USE module_configure , ONLY : nl_get_spec_zone, nl_get_relax_zone
-!    USE module_state_description
+      !    USE module_configure , ONLY : nl_get_spec_zone, nl_get_relax_zone
+      !    USE module_state_description
      USE module_interp_info
 
      IMPLICIT NONE
@@ -2714,7 +3139,7 @@ END MODULE module_interp_info
                        imask,                                &  ! interpolation mask
                        xstag, ystag,                         &  ! staggering of field
                        ipos, jpos,                           &  ! Position of lower left of nest in CD
-!                      ipos-1, jpos-1,                       &  ! Position of lower left of nest in CD
+      !                      ipos-1, jpos-1,                       &  ! Position of lower left of nest in CD
                        nri, nrj                              )  ! Nest ratio, i- and j-directions
 
      !  Staggering, to determine loop indexes
@@ -2741,8 +3166,8 @@ END MODULE module_interp_info
 
      sz = MIN(MAX( spec_zone, relax_zone + 1 ),spec_bdy_width)
 
-   !$OMP PARALLEL DO   &
-   !$OMP PRIVATE ( ni,nj,nk )
+     !$OMP PARALLEL DO   &
+     !$OMP PRIVATE ( ni,nj,nk )
      
      DO nj = MAX ( njts-nrj, njds ) , MIN ( njte+nrj, njde-jstag )
         DO nk = nkts, nkte
@@ -2794,7 +3219,7 @@ END MODULE module_interp_info
         END DO         ! nest k
      END DO            ! nest j
 
-   !$OMP END PARALLEL DO
+     !$OMP END PARALLEL DO
 
    END SUBROUTINE bdy_interp2
 
@@ -2839,8 +3264,8 @@ END MODULE module_interp_info
      ! Iterate over the ND tile and compute the values
      ! from the CD tile. 
 
-!write(0,'("cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
-!write(0,'("nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
+      !write(0,'("cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
+      !write(0,'("nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 
      DO nj = njts, njte
         cj = jpos + (nj-1) / nrj     ! j coord of CD point 
@@ -2901,8 +3326,8 @@ END MODULE module_interp_info
      ! Iterate over the ND tile and compute the values
      ! from the CD tile. 
 
-!write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
-!write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
+      !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte, cjts,cjte
+      !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte, njts,njte
 
      DO nj = njts, njte
         cj = jpos + (nj-1) / nrj     ! j coord of CD point 
@@ -3066,7 +3491,7 @@ END MODULE module_interp_info
    END SUBROUTINE interp_fcnm_lu
 
 
-   SUBROUTINE interp_fcnm_imask( cfld,                           &  ! CD field
+   SUBROUTINE interp_fcnm_imask( cfld,                           &  ! CD field   
                            cids, cide, ckds, ckde, cjds, cjde,   &
                            cims, cime, ckms, ckme, cjms, cjme,   &
                            cits, cite, ckts, ckte, cjts, cjte,   &
@@ -3105,8 +3530,8 @@ END MODULE module_interp_info
      ! Iterate over the ND tile and compute the values
      ! from the CD tile. 
 
-!write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte,cjts,cjte
-!write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte,njts,njte
+      !write(0,'("mask cits:cite, ckts:ckte, cjts:cjte ",6i4)')cits,cite, ckts,ckte,cjts,cjte
+      !write(0,'("mask nits:nite, nkts:nkte, njts:njte ",6i4)')nits,nite, nkts,nkte,njts,njte
 
      DO nj = njts, njte
         cj = jpos + (nj-1) / nrj     ! j coord of CD point 
@@ -3447,7 +3872,7 @@ END MODULE module_interp_info
             DO nk = nkts, nkte
                ck = nk
                DO ni = nits, nite
-!dave             IF ( imask(ni, nj) .NE. 1 ) cycle
+      !dave             IF ( imask(ni, nj) .NE. 1 ) cycle
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
                      ci = ( ni + (nri/2)-1 ) / nri + ipos -1 ! first coarse position equal to or to the left of nest point
                   ELSE
@@ -3576,7 +4001,7 @@ END MODULE module_interp_info
            DO nj = njts, njte
               DO nk = nkts, nkte
                  DO ni = nits, nite
-!dave               IF ( imask(ni, nj) .NE. 1 ) cycle
+      !dave               IF ( imask(ni, nj) .NE. 1 ) cycle
                     IF ( nfld(ni,nk,nj) .EQ. -4 ) THEN
                        IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
                           cj = ( nj + (nrj/2)-1 ) / nrj + jpos -1 ! first coarse position equal to or below nest point
@@ -3832,7 +4257,7 @@ END MODULE module_interp_info
       CALL nl_get_smooth_option  ( 1, smooth_option  )
 
       IF      ( smooth_option == 0 ) THEN
-! no op
+      ! no op
       ELSE IF ( smooth_option == 1 ) THEN
          CALL sm121 ( cfld , &
                       cids, cide, ckds, ckde, cjds, cjde,   &
@@ -4274,6 +4699,457 @@ END MODULE module_interp_info
 
    END SUBROUTINE interp_mask_field
 
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   ! ML : copy this function from WPS/metgrid to manage Soil init with fine_input_stream
+   !
+   ! Name: search_extrap
+   !
+   ! Purpose: Returns the point nearest to (xx,yy) that has a non-missing value.
+   !   If no valid value can be found in the array, msgval is returned.
+   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   FUNCTION search_extrap(xx, yy, izz, array, start_x, end_x, &
+              start_y, end_y, start_z, end_z, msgval, mask_relational, maskval, mask_array)
+ 
+      USE bitarray_module
+      USE queue_module
+
+      implicit none
+
+      ! Arguments
+      integer, intent(in) :: start_x, start_y, start_z
+      integer, intent(in) :: end_x, end_y, end_z
+      integer, intent(in) :: izz                ! The z-index of the 2d-array to search
+      real, intent(in) :: xx , yy               ! The location of the search origin 
+      real, intent(in) :: msgval
+      integer, intent(in), optional :: maskval
+      real, dimension(start_x:end_x, start_z:end_z, start_y:end_y), &
+          intent(in) :: array 
+       ! integer, dimension(:), intent(in) :: interp_list !ML remove this
+       ! integer, dimension(:), intent(in) :: interp_opts !ML remove this
+       ! integer, intent(in) :: idx !ML remove this
+      real, dimension(start_x:end_x, start_y:end_y), &
+          intent(in), optional :: mask_array 
+      character (len=1), intent(in), optional :: mask_relational
+
+      ! Return value
+      real :: search_extrap
+  
+      ! Local variables
+      integer :: i, j
+      real :: distance
+      logical :: found_valid
+      type (bitarray) :: b
+      type (queue) :: q
+      type (q_data) :: qdata
+      integer, parameter :: max_depth = 1000000
+
+      ! We only search if the starting point is within the array
+      if (nint(xx) < start_x .or. nint(xx) > end_x .or. &
+          nint(yy) < start_y .or. nint(yy) > end_y) then
+         search_extrap = msgval
+         return 
+      end if
+      
+      call bitarray_create(b, (end_x-start_x+1), (end_y-start_y+1))
+      call q_init(q)
+  
+      found_valid = .false.
+      qdata%x = nint(xx)
+      qdata%y = nint(yy)
+      qdata%depth = 0
+      call q_insert(q, qdata)
+      call bitarray_set(b, qdata%x-start_x+1, qdata%y-start_y+1)
+
+      do while (q_isdata(q) .and. (.not. found_valid))
+         qdata = q_remove(q) 
+         i = qdata%x
+         j = qdata%y
+
+         if (present(mask_array) .and. present(maskval) .and. present(mask_relational)) then
+            if (mask_relational == '>' .and. mask_array(i,j) <= maskval .and. array(i,izz,j) /= msgval) then
+               found_valid = .true.
+            else if (mask_relational == '<' .and. mask_array(i,j) >= maskval .and. array(i,izz,j) /= msgval) then
+               found_valid = .true.
+            else if (mask_relational == ' ' .and. mask_array(i,j) /= maskval .and. array(i,izz,j) /= msgval) then
+               found_valid = .true.
+            end if
+         else if (present(mask_array) .and. present(maskval)) then
+            if (array(i,izz,j) /= msgval .and. mask_array(i,j) /= maskval) found_valid = .true.                  
+         else
+            if (array(i,izz,j) /= msgval) found_valid = .true. 
+         end if
+
+         if (i-1 >= start_x) then
+            if (.not. bitarray_test(b, (i-1)-start_x+1, j-start_y+1)) then
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+                  qdata%x = i-1
+                  qdata%y = j
+                  qdata%depth = qdata%depth+1
+                  call q_insert(q, qdata)
+                  call bitarray_set(b, (i-1)-start_x+1, j-start_y+1)
+               end if
+            end if
+         end if  
+         if (i+1 <= end_x) then
+            if (.not. bitarray_test(b, (i+1)-start_x+1, j-start_y+1)) then
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+                  qdata%x = i+1
+                  qdata%y = j
+                  qdata%depth = qdata%depth+1
+                  call q_insert(q, qdata)
+                  call bitarray_set(b, (i+1)-start_x+1, j-start_y+1)
+               end if
+            end if
+         end if  
+         if (j-1 >= start_y) then
+            if (.not. bitarray_test(b, i-start_x+1, (j-1)-start_y+1)) then
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+                  qdata%x = i
+                  qdata%y = j-1
+                  qdata%depth = qdata%depth+1
+                  call q_insert(q, qdata)
+                  call bitarray_set(b, i-start_x+1, (j-1)-start_y+1)
+               end if
+            end if
+         end if  
+         if (j+1 <= end_y) then
+            if (.not. bitarray_test(b, i-start_x+1, (j+1)-start_y+1)) then
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+                  qdata%x = i
+                  qdata%y = j+1
+                  qdata%depth = qdata%depth+1
+                  call q_insert(q, qdata)
+                  call bitarray_set(b, i-start_x+1, (j+1)-start_y+1)
+               end if
+            end if
+         end if  
+      end do
+  
+      if (found_valid) then
+         distance = (real(i)-xx)*(real(i)-xx)+(real(j)-yy)*(real(j)-yy) 
+         search_extrap = array(i,izz,j)
+         do while (q_isdata(q))
+            qdata = q_remove(q)
+            if (present(mask_array) .and. present(maskval) .and. present(mask_relational)) then
+               if (mask_relational == '<' .and. mask_array(qdata%x,qdata%y) >= maskval &
+                   .and. array(qdata%x,izz,qdata%y) /= msgval) then
+                  if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
+                     distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
+                     search_extrap = array(qdata%x, izz, qdata%y)
+                  end if
+               else if (mask_relational == '>' .and. mask_array(qdata%x,qdata%y) <= maskval &
+                        .and. array(qdata%x,izz,qdata%y) /= msgval) then
+                  if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
+                     distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
+                     search_extrap = array(qdata%x, izz, qdata%y)
+                  end if
+               else if (mask_relational == ' ' .and. mask_array(qdata%x,qdata%y) /= maskval &
+                        .and. array(qdata%x,izz,qdata%y) /= msgval) then
+                  if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
+                     distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
+                     search_extrap = array(qdata%x, izz, qdata%y)
+                  end if
+               end if
+                
+            else if (present(mask_array) .and. present(maskval)) then
+               if (array(qdata%x,izz,qdata%y) /= msgval .and. mask_array(qdata%x,qdata%y) /= maskval) then
+                  if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
+                     distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
+                     search_extrap = array(qdata%x, izz, qdata%y)
+                  end if
+               end if
+                
+            else
+               if (array(qdata%x,izz,qdata%y) /= msgval) then
+                  if ((real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) < distance) then
+                     distance = (real(qdata%x)-xx)*(real(qdata%x)-xx)+(real(qdata%y)-yy)*(real(qdata%y)-yy) 
+                     search_extrap = array(qdata%x, izz, qdata%y)
+                  end if
+               end if
+            end if
+         end do
+      else
+         search_extrap = msgval
+      end if
+  
+      call q_destroy(q)
+      call bitarray_destroy(b)
+ 
+   END FUNCTION search_extrap
+
+
+   !ML : This method is a copy of interp_mask_field for the fine_lu option :
+   ! Difference : if a land point in nest is surrounded by water points in coarse, a search algorithm is used 
+   ! instead of interpolating from water points.
+   ! With a new fine landuse dataset, the redefinition of the coastline may sometimes generate those kind of points
+   ! However in TSLB array, water points have a default value of 273.15 K (0°C) which is too much wrong.
+   SUBROUTINE interp_mask_field_fine_lu ( enable,                  &  ! says whether to allow interpolation or just the bcasts
+                                       cfld,                     &  ! CD field
+                           cids, cide, ckds, ckde, cjds, cjde,   &
+                           cims, cime, ckms, ckme, cjms, cjme,   &
+                           cits, cite, ckts, ckte, cjts, cjte,   &
+                           nfld,                                 &  ! ND field
+                           nids, nide, nkds, nkde, njds, njde,   &
+                           nims, nime, nkms, nkme, njms, njme,   &
+                           nits, nite, nkts, nkte, njts, njte,   &
+                           shw,                                  &  ! stencil half width
+                           imask,                                &  ! interpolation mask
+                           xstag, ystag,                         &  ! staggering of field
+                           ipos, jpos,                           &  ! Position of lower left of nest in CD
+                           nri, nrj,                             &  ! nest ratios
+                           clu, nlu, cflag, nflag, varname ) 
+
+      USE module_configure
+      USE module_wrf_error
+      USE module_dm , only :  wrf_dm_sum_reals, wrf_dm_sum_integers
+
+      IMPLICIT NONE
+
+      LOGICAL, INTENT(IN) :: enable
+      INTEGER, INTENT(IN) :: cids, cide, ckds, ckde, cjds, cjde,   &
+                             cims, cime, ckms, ckme, cjms, cjme,   &
+                             cits, cite, ckts, ckte, cjts, cjte,   &
+                             nids, nide, nkds, nkde, njds, njde,   &
+                             nims, nime, nkms, nkme, njms, njme,   &
+                             nits, nite, nkts, nkte, njts, njte,   &
+                             shw,                                  &  ! stencil half width
+                             ipos, jpos,                           &
+                             nri, nrj, cflag, nflag
+      LOGICAL, INTENT(IN) :: xstag, ystag
+      CHARACTER (len=256), OPTIONAL, INTENT(IN) :: varname
+
+      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
+      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
+      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
+
+      REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
+      REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
+
+      ! Local
+      INTEGER :: ci, cj, ck, ni, nj, nk, ip, jp
+      REAL :: xx, yy !ML add xx, yy for search
+      INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
+      REAL :: avg, sum, dx , dy
+      INTEGER :: icount_water(nkts:nkte), icount_land(nkts:nkte), idummy(nkts:nkte)
+      REAL :: avg_water(nkts:nkte), avg_land(nkts:nkte), sum_water(nkts:nkte), sum_land(nkts:nkte), dummy(nkts:nkte)
+      CHARACTER (len=256) :: message
+      CHARACTER (len=256) :: a_mess
+
+      INTERFACE
+         FUNCTION search_extrap(xx, yy, izz, array, start_x, end_x, &
+            start_y, end_y, start_z, end_z, msgval, mask_relational, maskval, mask_array)
+            USE bitarray_module
+            USE queue_module
+            ! Arguments
+            integer, intent(in) :: start_x, start_y, start_z
+            integer, intent(in) :: end_x, end_y, end_z
+            integer, intent(in) :: izz                ! The z-index of the 2d-array to search
+            real, intent(in) :: xx , yy               ! The location of the search origin 
+            real, intent(in) :: msgval
+            integer, intent(in), optional :: maskval
+            real, dimension(start_x:end_x, start_z:end_z, start_y:end_y), &
+               intent(in) :: array 
+            real, dimension(start_x:end_x, start_y:end_y), &
+               intent(in), optional :: mask_array 
+            character (len=1), intent(in), optional :: mask_relational
+
+            ! Return value
+            real :: search_extrap
+         END FUNCTION search_extrap
+      END INTERFACE
+
+      !  Find out what the water value is.
+      !CALL nl_get_iswater(1,iswater)
+      iswater = nflag
+
+      !  Right now, only mass point locations permitted.
+
+      IF ( ( .NOT. xstag) .AND. ( .NOT. ystag ) ) THEN
+
+        !  Loop over each i,k,j in the nested domain.
+
+        IF ( enable ) THEN
+          DO nj = njts, njte
+            ! first coarse position equal to or below nest point
+            IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
+               cj = ( nj + (nrj/2)-1 ) / nrj + jpos -1
+            ELSE
+               cj = ( nj + (nrj-1)/2 ) / nrj + jpos -1
+            END IF
+            DO nk = nkts, nkte
+               ck = nk
+               DO ni = nits, nite
+                  IF ( imask(ni, nj) .NE. 1 ) THEN
+                     WRITE (wrf_err_message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
+                     CALL wrf_message ( wrf_err_message )
+                     cycle
+                  END IF
+                  ! first coarse position equal to or to the left of nest point
+                  IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
+                     ci = ( ni + (nri/2)-1 ) / nri + ipos -1
+                  ELSE
+                     ci = ( ni + (nri-1)/2 ) / nri + ipos -1
+                  END IF
+
+                  !
+                  !                    (ci,cj+1)     (ci+1,cj+1)
+                  !               -        -------------
+                  !         1-dy  |        |           |
+                  !               |        |           |
+                  !               -        |  *        |
+                  !          dy   |        | (ni,nj)   |
+                  !               |        |           |
+                  !               -        -------------
+                  !                    (ci,cj)       (ci+1,cj)
+                  !
+                  !                        |--|--------|
+                  !                         dx  1-dx
+
+                  !  For odd ratios, at (nri+1)/2, we are on the coarse grid point, so dx = 0
+
+                  IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
+                     dx = ( REAL ( MOD ( ni+(nri-1)/2 , nri ) ) + 0.5 ) / REAL ( nri )
+                  ELSE
+                     dx =   REAL ( MOD ( ni+(nri-1)/2 , nri ) )         / REAL ( nri )
+                  END IF
+                  IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
+                     dy = ( REAL ( MOD ( nj+(nrj-1)/2 , nrj ) ) + 0.5 ) / REAL ( nrj )
+                  ELSE
+                     dy =   REAL ( MOD ( nj+(nrj-1)/2 , nrj ) )         / REAL ( nrj )
+                  END IF
+
+                  ! Nested cell is a water cell.
+                  IF ( ( NINT(nlu(ni, nj)) .EQ. iswater ) ) THEN
+
+                     ! If the surrounding coarse values are all WATER points,
+                     ! i.e. open water, this is a simple 4-pt interpolation. 
+                     ! If the surrounding coarse values are all LAND points,
+                     ! i.e. this is a 1-cell lake, we have no better way to 
+                     ! come up with the value than to do a simple 4-pt interpolation.
+
+                     IF ( ALL( clu(ci:ci+1,cj:cj+1) == iswater ) .OR. &
+                          ALL( clu(ci:ci+1,cj:cj+1) /= iswater ) ) THEN
+
+                       nfld(ni,nk,nj) = ( 1. - dx ) * ( ( 1. - dy ) * cfld(ci  ,ck,cj  )   + &
+                                                               dy   * cfld(ci  ,ck,cj+1) ) + &
+                                               dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
+                                                               dy   * cfld(ci+1,ck,cj+1) )
+
+                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
+                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point 4pt returned an invalid value (',&
+                              nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                           CALL wrf_message ( wrf_err_message )
+                        END IF
+                     !  If there are some land points and some water points, take an average.
+                     ELSE
+                       icount = 0
+                       sum = 0.
+                       IF ( NINT(clu(ci  ,cj  )) .EQ. iswater ) THEN
+                          icount = icount + 1
+                          sum = sum + cfld(ci  ,ck,cj  )
+                       END IF
+                       IF ( NINT(clu(ci+1,cj  )) .EQ. iswater ) THEN
+                          icount = icount + 1
+                          sum = sum + cfld(ci+1,ck,cj  )
+                       END IF
+                       IF ( NINT(clu(ci  ,cj+1)) .EQ. iswater ) THEN
+                          icount = icount + 1
+                          sum = sum + cfld(ci  ,ck,cj+1)
+                       END IF
+                       IF ( NINT(clu(ci+1,cj+1)) .EQ. iswater ) THEN
+                          icount = icount + 1
+                          sum = sum + cfld(ci+1,ck,cj+1)
+                       END IF
+                       nfld(ni,nk,nj) = sum / REAL ( icount )
+                       IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
+                          WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point average returned an invalid value (',&
+                             nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                          CALL wrf_message ( wrf_err_message )
+                       END IF
+                     END IF
+                     IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
+                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point returned an invalid value (',&
+                           nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                        CALL wrf_message ( wrf_err_message )
+                     END IF
+
+                  ! Nested cell is a land cell.
+                   ELSE IF ( ( NINT(nlu(ni, nj)) .NE. iswater ) ) THEN
+
+                     !ML : If the surrounding coarse values are all WATER points, do a search
+                     IF (ALL( clu(ci:ci+1,cj:cj+1) == iswater )) THEN
+                        !start search from the nearest point
+                        xx = REAL(ci) + dx
+                        yy = REAL(cj) + dy
+                        nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cims, cime, &
+                                    cjms, cjme, ckms, ckme, 1000.0, ' ', iswater, clu)
+                        IF (nfld(ni,nk,nj) == 1000.0) THEN
+                           CALL wrf_error_fatal("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
+                        END IF
+                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
+                              nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                           CALL wrf_message ( wrf_err_message )
+                        END IF
+                     ! If the surrounding coarse values are all LAND points,
+                     ! this is a simple 4-pt interpolation. 
+                     ELSE IF (ALL( clu(ci:ci+1,cj:cj+1) /= iswater ) ) THEN
+
+                       nfld(ni,nk,nj) = ( 1. - dx ) * ( ( 1. - dy ) * cfld(ci  ,ck,cj  )   + &
+                                                               dy   * cfld(ci  ,ck,cj+1) ) + &
+                                               dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
+                                                               dy   * cfld(ci+1,ck,cj+1) )
+                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
+                              nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                           CALL wrf_message ( wrf_err_message )
+                        END IF
+                    !  If there are some water points and some land points, take an average.                  
+                    ELSE
+                      icount = 0
+                      sum = 0.
+                      IF ( NINT(clu(ci  ,cj  )) .NE. iswater ) THEN
+                         icount = icount + 1
+                         sum = sum + cfld(ci  ,ck,cj  )
+                      END IF
+                      IF ( NINT(clu(ci+1,cj  )) .NE. iswater ) THEN
+                         icount = icount + 1
+                         sum = sum + cfld(ci+1,ck,cj  )
+                      END IF
+                      IF ( NINT(clu(ci  ,cj+1)) .NE. iswater ) THEN
+                         icount = icount + 1
+                         sum = sum + cfld(ci  ,ck,cj+1)
+                      END IF
+                      IF ( NINT(clu(ci+1,cj+1)) .NE. iswater ) THEN
+                         icount = icount + 1
+                         sum = sum + cfld(ci+1,ck,cj+1)
+                      END IF
+                      nfld(ni,nk,nj) = sum / REAL ( icount )
+
+                      IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
+                           nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                        CALL wrf_message ( wrf_err_message )
+                      END IF
+                    END IF
+                  END IF
+
+                  IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 200.0)) THEN
+                     WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
+                        nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
+                     CALL wrf_message ( wrf_err_message )
+                  END IF
+               END DO
+            END DO
+          END DO
+
+        END IF
+      ELSE
+         CALL wrf_error_fatal ( "only unstaggered fields right now" )
+      END IF
+
+   END SUBROUTINE interp_mask_field_fine_lu
+
 
    SUBROUTINE interp_mask_soil ( enable,                  &  ! says whether to allow interpolation or just the bcasts
                                        cfld,                     &  ! CD field
@@ -4454,7 +5330,7 @@ END MODULE module_interp_info
             ENDDO
           END IF ! nfld = -1
 #endif
-
+   !
           IF ( ANY(nfld .EQ. -1) ) THEN
             DO nj = njts, njte
                DO nk = nkts, nkte
