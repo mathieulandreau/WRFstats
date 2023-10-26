@@ -4741,6 +4741,7 @@ END MODULE module_interp_info
       type (bitarray) :: b
       type (queue) :: q
       type (q_data) :: qdata
+      integer, parameter :: max_depth = 1000000
 
       ! We only search if the starting point is within the array
       if (nint(xx) < start_x .or. nint(xx) > end_x .or. &
@@ -4780,7 +4781,7 @@ END MODULE module_interp_info
 
          if (i-1 >= start_x) then
             if (.not. bitarray_test(b, (i-1)-start_x+1, j-start_y+1)) then
-               if (qdata%depth < 1200) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
                   qdata%x = i-1
                   qdata%y = j
                   qdata%depth = qdata%depth+1
@@ -4791,7 +4792,7 @@ END MODULE module_interp_info
          end if  
          if (i+1 <= end_x) then
             if (.not. bitarray_test(b, (i+1)-start_x+1, j-start_y+1)) then
-               if (qdata%depth < 1200) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
                   qdata%x = i+1
                   qdata%y = j
                   qdata%depth = qdata%depth+1
@@ -4802,7 +4803,7 @@ END MODULE module_interp_info
          end if  
          if (j-1 >= start_y) then
             if (.not. bitarray_test(b, i-start_x+1, (j-1)-start_y+1)) then
-               if (qdata%depth < 1200) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
                   qdata%x = i
                   qdata%y = j-1
                   qdata%depth = qdata%depth+1
@@ -4813,7 +4814,7 @@ END MODULE module_interp_info
          end if  
          if (j+1 <= end_y) then
             if (.not. bitarray_test(b, i-start_x+1, (j+1)-start_y+1)) then
-               if (qdata%depth < 1200) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
+               if (qdata%depth < max_depth) then  ! ML replace interp_opts(idx-1) by 1200 (see routine get_search_depth in metgrid)
                   qdata%x = i
                   qdata%y = j+1
                   qdata%depth = qdata%depth+1
@@ -5042,7 +5043,7 @@ END MODULE module_interp_info
                      !  If there are some land points and some water points, take an average.
                      ELSE
                        icount = 0
-                       sum = 0
+                       sum = 0.
                        IF ( NINT(clu(ci  ,cj  )) .EQ. iswater ) THEN
                           icount = icount + 1
                           sum = sum + cfld(ci  ,ck,cj  )
@@ -5061,13 +5062,13 @@ END MODULE module_interp_info
                        END IF
                        nfld(ni,nk,nj) = sum / REAL ( icount )
                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
-                          WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, water point average returned an invalid value (',&
+                          WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point average returned an invalid value (',&
                              nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                           CALL wrf_message ( wrf_err_message )
                        END IF
                      END IF
                      IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
-                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, water point returned an invalid value (',&
+                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point returned an invalid value (',&
                            nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                         CALL wrf_message ( wrf_err_message )
                      END IF
@@ -5086,7 +5087,7 @@ END MODULE module_interp_info
                            CALL wrf_error_fatal("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
                         END IF
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, search_extrap returned an invalid value (',&
+                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                            CALL wrf_message ( wrf_err_message )
                         END IF
@@ -5099,14 +5100,14 @@ END MODULE module_interp_info
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, 4pt returned an invalid value (',&
+                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                            CALL wrf_message ( wrf_err_message )
                         END IF
                     !  If there are some water points and some land points, take an average.                  
                     ELSE
                       icount = 0
-                      sum = 0
+                      sum = 0.
                       IF ( NINT(clu(ci  ,cj  )) .NE. iswater ) THEN
                          icount = icount + 1
                          sum = sum + cfld(ci  ,ck,cj  )
@@ -5126,7 +5127,7 @@ END MODULE module_interp_info
                       nfld(ni,nk,nj) = sum / REAL ( icount )
 
                       IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, averaging returned an invalid value (',&
+                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
                            nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                         CALL wrf_message ( wrf_err_message )
                       END IF
@@ -5134,7 +5135,7 @@ END MODULE module_interp_info
                   END IF
 
                   IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 200.0)) THEN
-                     WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_fiel_fine_lu, (global test) returned an invalid value (',&
+                     WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
                         nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                      CALL wrf_message ( wrf_err_message )
                   END IF
