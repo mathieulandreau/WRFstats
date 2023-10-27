@@ -5110,7 +5110,7 @@ END MODULE module_interp_info
                       END IF
                       value = sum / REAL ( icount )
 
-                      IF ( value .LE. 273.15)) THEN
+                      IF (value .LE. 273.15) THEN
                         WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
                         value,'at (ni, nk, nj) = ',ni,nk,nj,')'
                         CALL wrf_message ( message )
