@@ -4930,8 +4930,8 @@ END MODULE module_interp_info
       REAL :: xx, yy !ML add xx, yy for search
       INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
       REAL :: avg, sum, dx , dy
-      INTEGER :: icount_water(nkts:nkte), icount_land(nkts:nkte), idummy(nkts:nkte)
-      REAL :: avg_water(nkts:nkte), avg_land(nkts:nkte), sum_water(nkts:nkte), sum_land(nkts:nkte), dummy(nkts:nkte)
+      INTEGER :: icount_water(nkds:nkde), icount_land(nkds:nkde), idummy(nkds:nkde)
+      REAL :: avg_water(nkds:nkde), avg_land(nkds:nkde), sum_water(nkds:nkde), sum_land(nkds:nkde), dummy(nkds:nkde)
       CHARACTER (len=256) :: message
       CHARACTER (len=256) :: a_mess
 
@@ -4969,16 +4969,16 @@ END MODULE module_interp_info
         !  Loop over each i,k,j in the nested domain.
 
         IF ( enable ) THEN
-          DO nj = njts, njte
+          DO nj = njds, njde
             ! first coarse position equal to or below nest point
             IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
                cj = ( nj + (nrj/2)-1 ) / nrj + jpos -1
             ELSE
                cj = ( nj + (nrj-1)/2 ) / nrj + jpos -1
             END IF
-            DO nk = nkts, nkte
+            DO nk = nkds, nkde
                ck = nk
-               DO ni = nits, nite
+               DO ni = nids, nide
                   IF ( imask(ni, nj) .NE. 1 ) THEN
                      WRITE (message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
                      CALL wrf_message ( message )

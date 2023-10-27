@@ -774,7 +774,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 #endif
      END IF
 
-     IF (nest_config_flags%interp_soil_fine_lu > 0) THEN
+     IF (nest_config_flags%interp_soil_fine_lu > 0 .AND. nest%active_this_task) THEN
          WRITE(message,FMT='(A,I2,A,I2,A)') '*** Initializing soil quantities in nest domain #',nest%id,&
                                      ' by horizontally interpolating parent domain #' ,parent%id, &
                                      ' after having read fine land_use data in wrfinput file. ***'
