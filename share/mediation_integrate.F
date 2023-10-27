@@ -530,10 +530,10 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
    LOGICAL, EXTERNAL      :: wrf_dm_on_monitor
    TYPE(WRFU_Time)        :: strt_time, cur_time
    CHARACTER * 256        :: rstname , timestr
-   CHARACTER * 256        :: message
+   CHARACTER * 256        :: message, rowfmt
    INTEGER                :: fid
    INTEGER                :: ierr
-   INTEGER                :: i , j, rc
+   INTEGER                :: i , j, rc, k
    INTEGER                :: ids , ide , jds , jde , kds , kde , &
                              ims , ime , jms , jme , kms , kme , &
                              ips , ipe , jps , jpe , kps , kpe
@@ -804,8 +804,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             "TSLB"&
          )
          IF (MINVAL(nest%tslb) < 200.0) THEN
-            WRITE(message,FMT='(A)') '*** WARNING after fine_lu: wrong values in TSLB ***'
+            WRITE(message,FMT='(A,F10.5)') '*** WARNING after fine_lu: wrong values in TSLB ***', MINVAL(nest%tslb)
             CALL wrf_debug ( 0 , message )
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
+            DO k=1,config_flags%num_soil_layers
+               WRITE(message,FMT='(I1)') k
+               CALL wrf_debug ( 0 , message )
+               DO i=ipe,ips
+                  WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=jpe,jps)
+                  CALL wrf_debug ( 0 , message )
+               END DO
+            END DO
          END IF
 
          IF (nest_config_flags%interp_soil_fine_lu > 1) THEN
