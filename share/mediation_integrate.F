@@ -785,6 +785,9 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                    cids, cide, cjds, cjde, ckds, ckde,    &
                                    cims, cime, cjms, cjme, ckms, ckme,    &
                                    cips, cipe, cjps, cjpe, ckps, ckpe    )
+         
+         WRITE(message,*) 'SIZE(tslb, 1)', SIZE(nest%tslb,1), ", ids, ide, ims, ime, ips, ipe :", ids, ide, ims, ime, ips, ipe
+         CALL wrf_debug ( 0 , message )
          CALL interp_mask_field_fine_lu(&
             (SIZE(nest%intermediate_grid%tslb,1)*SIZE(nest%intermediate_grid%tslb,3) .GT. 1),&
             nest%intermediate_grid%tslb,&

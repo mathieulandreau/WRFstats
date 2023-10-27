@@ -4918,12 +4918,12 @@ END MODULE module_interp_info
       LOGICAL, INTENT(IN) :: xstag, ystag
       CHARACTER (len=100), OPTIONAL, INTENT(IN) :: varname
 
-      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
-      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
-      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
+      REAL, DIMENSION ( cids:cide, ckds:ckde, cjds:cjde ) :: cfld
+      REAL, DIMENSION ( nids:nide, nkds:nkde, njds:njde ) :: nfld
+      INTEGER, DIMENSION ( nids:nide, njds:njde ) :: imask
 
-      REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
-      REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
+      REAL, DIMENSION ( cids:cide, cjds:cjde ) :: clu
+      REAL, DIMENSION ( nids:nide, njds:njde ) :: nlu
 
       ! Local
       INTEGER :: ci, cj, ck, ni, nj, nk, ip, jp
@@ -5081,10 +5081,10 @@ END MODULE module_interp_info
                         !start search from the nearest point
                         xx = REAL(ci) + dx
                         yy = REAL(cj) + dy
-                        nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cims, cime, &
-                                    cjms, cjme, ckms, ckme, 1000.0, ' ', iswater, clu)
+                        nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cids, cide, &
+                                    cjds, cjde, ckds, ckde, 1000.0, ' ', iswater, clu)
                         IF (nfld(ni,nk,nj) == 1000.0) THEN
-                           CALL wrf_error_fatal("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
+                           CALL wrf_message("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
                         END IF
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
                            WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
