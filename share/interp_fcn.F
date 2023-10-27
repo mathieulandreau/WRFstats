@@ -4932,7 +4932,7 @@ END MODULE module_interp_info
       REAL :: avg, sum, dx , dy
       INTEGER :: icount_water(nkts:nkte), icount_land(nkts:nkte), idummy(nkts:nkte)
       REAL :: avg_water(nkts:nkte), avg_land(nkts:nkte), sum_water(nkts:nkte), sum_land(nkts:nkte), dummy(nkts:nkte)
-      CHARACTER (len=256) :: message, wrf_err_message
+      CHARACTER (len=256) :: message
       CHARACTER (len=256) :: a_mess
 
       INTERFACE
@@ -4980,8 +4980,8 @@ END MODULE module_interp_info
                ck = nk
                DO ni = nits, nite
                   IF ( imask(ni, nj) .NE. 1 ) THEN
-                     WRITE (wrf_err_message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
-                     CALL wrf_message ( wrf_err_message )
+                     WRITE (message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
+                     CALL wrf_message ( message )
                      cycle
                   END IF
                   ! first coarse position equal to or to the left of nest point
@@ -5036,9 +5036,9 @@ END MODULE module_interp_info
                                                                dy   * cfld(ci+1,ck,cj+1) )
 
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
-                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point 4pt returned an invalid value (',&
+                           WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point 4pt returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                           CALL wrf_message ( wrf_err_message )
+                           CALL wrf_message ( message )
                         END IF
                      !  If there are some land points and some water points, take an average.
                      ELSE
@@ -5062,15 +5062,15 @@ END MODULE module_interp_info
                        END IF
                        nfld(ni,nk,nj) = sum / REAL ( icount )
                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
-                          WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point average returned an invalid value (',&
+                          WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point average returned an invalid value (',&
                              nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                          CALL wrf_message ( wrf_err_message )
+                          CALL wrf_message ( message )
                        END IF
                      END IF
                      IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .NE. 273.15)) THEN
-                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point returned an invalid value (',&
+                        WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, water point returned an invalid value (',&
                            nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                        CALL wrf_message ( wrf_err_message )
+                        CALL wrf_message ( message )
                      END IF
 
                   ! Nested cell is a land cell.
@@ -5087,9 +5087,9 @@ END MODULE module_interp_info
                            CALL wrf_error_fatal("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
                         END IF
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
+                           WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                           CALL wrf_message ( wrf_err_message )
+                           CALL wrf_message ( message )
                         END IF
                      ! If the surrounding coarse values are all LAND points,
                      ! this is a simple 4-pt interpolation. 
@@ -5100,9 +5100,9 @@ END MODULE module_interp_info
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
                         IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                           WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
+                           WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                           CALL wrf_message ( wrf_err_message )
+                           CALL wrf_message ( message )
                         END IF
                     !  If there are some water points and some land points, take an average.                  
                     ELSE
@@ -5127,17 +5127,17 @@ END MODULE module_interp_info
                       nfld(ni,nk,nj) = sum / REAL ( icount )
 
                       IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
-                        WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
+                        WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
                            nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                        CALL wrf_message ( wrf_err_message )
+                        CALL wrf_message ( message )
                       END IF
                     END IF
                   END IF
 
-                  IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 200.0)) THEN
-                     WRITE (wrf_err_message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
+                  IF ((TRIM(varname) .EQ. "TSLB") .AND. ((nfld(ni, nk, nj) .LE. 250.0) .OR. (nfld(ni, nk, nj) .GE. 350.0))) THEN
+                     WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
                         nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
-                     CALL wrf_message ( wrf_err_message )
+                     CALL wrf_message ( message )
                   END IF
                END DO
             END DO
