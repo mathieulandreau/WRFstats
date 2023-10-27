@@ -4918,20 +4918,18 @@ END MODULE module_interp_info
       LOGICAL, INTENT(IN) :: xstag, ystag
       CHARACTER (len=100), OPTIONAL, INTENT(IN) :: varname
 
-      REAL, DIMENSION ( cids:cide, ckds:ckde, cjds:cjde ) :: cfld
-      REAL, DIMENSION ( nids:nide, nkds:nkde, njds:njde ) :: nfld
-      INTEGER, DIMENSION ( nids:nide, njds:njde ) :: imask
+      REAL, DIMENSION ( cims:cime, ckms:ckme, cjms:cjme ) :: cfld
+      REAL, DIMENSION ( nims:nime, nkms:nkme, njms:njme ) :: nfld
+      INTEGER, DIMENSION ( nims:nime, njms:njme ) :: imask
 
-      REAL, DIMENSION ( cids:cide, cjds:cjde ) :: clu
-      REAL, DIMENSION ( nids:nide, njds:njde ) :: nlu
+      REAL, DIMENSION ( cims:cime, cjms:cjme ) :: clu
+      REAL, DIMENSION ( nims:nime, njms:njme ) :: nlu
 
       ! Local
       INTEGER :: ci, cj, ck, ni, nj, nk, ip, jp
       REAL :: xx, yy !ML add xx, yy for search
       INTEGER :: icount, ii , jj , ist , ien , jst , jen , iswater, ierr
-      REAL :: avg, sum, dx , dy
-      INTEGER :: icount_water(nkds:nkde), icount_land(nkds:nkde), idummy(nkds:nkde)
-      REAL :: avg_water(nkds:nkde), avg_land(nkds:nkde), sum_water(nkds:nkde), sum_land(nkds:nkde), dummy(nkds:nkde)
+      REAL :: sum, dx, dy
       CHARACTER (len=256) :: message
       CHARACTER (len=256) :: a_mess
 
@@ -4969,16 +4967,16 @@ END MODULE module_interp_info
         !  Loop over each i,k,j in the nested domain.
 
         IF ( enable ) THEN
-          DO nj = njds, njde
+          DO nj = njts, njte
             ! first coarse position equal to or below nest point
             IF ( MOD ( nrj , 2 ) .EQ. 0 ) THEN
                cj = ( nj + (nrj/2)-1 ) / nrj + jpos -1
             ELSE
                cj = ( nj + (nrj-1)/2 ) / nrj + jpos -1
             END IF
-            DO nk = nkds, nkde
+            DO nk = nkts, nkte
                ck = nk
-               DO ni = nids, nide
+               DO ni = nits, nite
                   IF ( imask(ni, nj) .NE. 1 ) THEN
                      WRITE (message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
                      CALL wrf_message ( message )
@@ -5081,12 +5079,12 @@ END MODULE module_interp_info
                         !start search from the nearest point
                         xx = REAL(ci) + dx
                         yy = REAL(cj) + dy
-                        nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cids, cide, &
-                                    cjds, cjde, ckds, ckde, 1000.0, ' ', iswater, clu)
+                        nfld(ni,nk,nj) = search_extrap(xx, yy, ck, cfld, cims, cime, &
+                                    cjms, cjme, ckms, ckme, 1000.0, ' ', iswater, clu)
                         IF (nfld(ni,nk,nj) == 1000.0) THEN
                            CALL wrf_message("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
                         END IF
-                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                        IF ((nfld(ni, nk, nj) .LE. 273.15)) THEN
                            WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                            CALL wrf_message ( message )
@@ -5099,7 +5097,7 @@ END MODULE module_interp_info
                                                                dy   * cfld(ci  ,ck,cj+1) ) + &
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
-                        IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                        IF ((nfld(ni, nk, nj) .LE. 273.15)) THEN
                            WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                            CALL wrf_message ( message )
@@ -5126,7 +5124,7 @@ END MODULE module_interp_info
                       END IF
                       nfld(ni,nk,nj) = sum / REAL ( icount )
 
-                      IF ((TRIM(varname) .EQ. "TSLB") .AND. (nfld(ni, nk, nj) .LE. 273.15)) THEN
+                      IF ( (nfld(ni, nk, nj) .LE. 273.15)) THEN
                         WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
                            nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                         CALL wrf_message ( message )
@@ -5134,7 +5132,7 @@ END MODULE module_interp_info
                     END IF
                   END IF
 
-                  IF ((TRIM(varname) .EQ. "TSLB") .AND. ((nfld(ni, nk, nj) .LE. 250.0) .OR. (nfld(ni, nk, nj) .GE. 350.0))) THEN
+                  IF (((nfld(ni, nk, nj) .LE. 250.0) .OR. (nfld(ni, nk, nj) .GE. 350.0))) THEN
                      WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
                         nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                      CALL wrf_message ( message )
