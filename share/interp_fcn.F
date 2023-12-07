@@ -5019,44 +5019,45 @@ END MODULE module_interp_info
 
                   ! Nested cell is a water cell.
                   IF ( ( NINT(nlu(ni, nj)) .EQ. iswater ) ) THEN
+                     ! Do Nothing for water points
+                     IF(.FALSE.) THEN
+                        ! If the surrounding coarse values are all WATER points,
+                        ! i.e. open water, this is a simple 4-pt interpolation. 
+                        ! If the surrounding coarse values are all LAND points,
+                        ! i.e. this is a 1-cell lake, we have no better way to 
+                        ! come up with the value than to do a simple 4-pt interpolation.
+                        IF ( ALL( clu(ci:ci+1,cj:cj+1) == iswater ) .OR. &
+                           ALL( clu(ci:ci+1,cj:cj+1) /= iswater ) ) THEN
 
-                     ! If the surrounding coarse values are all WATER points,
-                     ! i.e. open water, this is a simple 4-pt interpolation. 
-                     ! If the surrounding coarse values are all LAND points,
-                     ! i.e. this is a 1-cell lake, we have no better way to 
-                     ! come up with the value than to do a simple 4-pt interpolation.
+                        value = ( 1. - dx ) * ( ( 1. - dy ) * cfld(ci  ,ck,cj  )   + &
+                                                                  dy   * cfld(ci  ,ck,cj+1) ) + &
+                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
+                                                                  dy   * cfld(ci+1,ck,cj+1) )
 
-                     IF ( ALL( clu(ci:ci+1,cj:cj+1) == iswater ) .OR. &
-                          ALL( clu(ci:ci+1,cj:cj+1) /= iswater ) ) THEN
-
-                       value = ( 1. - dx ) * ( ( 1. - dy ) * cfld(ci  ,ck,cj  )   + &
-                                                               dy   * cfld(ci  ,ck,cj+1) ) + &
-                                               dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
-                                                               dy   * cfld(ci+1,ck,cj+1) )
-
-                     !  If there are some land points and some water points, take an average.
-                     ELSE
-                       icount = 0
-                       sum = 0.
-                       IF ( NINT(clu(ci  ,cj  )) .EQ. iswater ) THEN
-                          icount = icount + 1
-                          sum = sum + cfld(ci  ,ck,cj  )
-                       END IF
-                       IF ( NINT(clu(ci+1,cj  )) .EQ. iswater ) THEN
-                          icount = icount + 1
-                          sum = sum + cfld(ci+1,ck,cj  )
-                       END IF
-                       IF ( NINT(clu(ci  ,cj+1)) .EQ. iswater ) THEN
-                          icount = icount + 1
-                          sum = sum + cfld(ci  ,ck,cj+1)
-                       END IF
-                       IF ( NINT(clu(ci+1,cj+1)) .EQ. iswater ) THEN
-                          icount = icount + 1
-                          sum = sum + cfld(ci+1,ck,cj+1)
-                       END IF
-                       value = sum / REAL ( icount )
+                        !  If there are some land points and some water points, take an average.
+                        ELSE
+                        icount = 0
+                        sum = 0.
+                        IF ( NINT(clu(ci  ,cj  )) .EQ. iswater ) THEN
+                           icount = icount + 1
+                           sum = sum + cfld(ci  ,ck,cj  )
+                        END IF
+                        IF ( NINT(clu(ci+1,cj  )) .EQ. iswater ) THEN
+                           icount = icount + 1
+                           sum = sum + cfld(ci+1,ck,cj  )
+                        END IF
+                        IF ( NINT(clu(ci  ,cj+1)) .EQ. iswater ) THEN
+                           icount = icount + 1
+                           sum = sum + cfld(ci  ,ck,cj+1)
+                        END IF
+                        IF ( NINT(clu(ci+1,cj+1)) .EQ. iswater ) THEN
+                           icount = icount + 1
+                           sum = sum + cfld(ci+1,ck,cj+1)
+                        END IF
+                        value = sum / REAL ( icount )
+                        END IF
+                        nfld(ni,nk,nj) = value
                      END IF
-                     nfld(ni,nk,nj) = value
                   ! Nested cell is a land cell.
                    ELSE IF ( ( NINT(nlu(ni, nj)) .NE. iswater ) ) THEN
 
