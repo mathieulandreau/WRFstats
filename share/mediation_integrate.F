@@ -787,6 +787,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                    cips, cipe, cjps, cjpe, ckps, ckpe    )
          
          WRITE(message,*) 'SIZE(tslb, 1)', SIZE(nest%tslb,1), ", ids, ide, ims, ime, ips, ipe :", ids, ide, ims, ime, ips, ipe
+         CALL wrf_debug ( 0 , message )
          WRITE(message,*) 'SIZE(int%tslb, 1)', SIZE(nest%intermediate_grid%tslb,1), ", ids, ide, ims, ime, ips, ipe :", cids, cide, cims, cime, cips, cipe
          CALL wrf_debug ( 0 , message )
          CALL interp_mask_field_fine_lu(&
@@ -840,16 +841,18 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                0.0, 0.99 &
             )
+         END IF
+         IF (nest_config_flags%interp_soil_fine_lu > 2) THEN
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%tsk,1)*SIZE(nest%intermediate_grid%tsk,2) .GT. 1),&
                nest%intermediate_grid%tsk,&
-               cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
-               cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
-               cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+               cids, cide, 1, 1, cjds, cjde,&
+               cims, cime, 1, 1, cjms, cjme,&
+               cips, cipe, 1, 1, cjps, cjpe,&
                nest%tsk,&
-               ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
-               ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
-               ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+               ids,  ide, 1, 1,  jds,  jde,&
+               ims,  ime, 1, 1,  jms,  jme,&
+               ips,  ipe, 1, 1,  jps,  jpe,&
                nest_config_flags%shw, nest%imask_nostag,&
                .FALSE.,.FALSE.,&
                nest%i_parent_start, nest%j_parent_start,&
@@ -858,8 +861,6 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                274.0, 350.0 &
             )
-         END IF
-         IF (nest_config_flags%interp_soil_fine_lu > 2) THEN
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%smcrel,1)*SIZE(nest%intermediate_grid%smcrel,3) .GT. 1),&
                nest%intermediate_grid%smcrel,&
