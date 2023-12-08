@@ -811,7 +811,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
          IF (MINVAL(nest%tslb) < 200.0) THEN
             WRITE(message,FMT='(A,F10.5)') '*** WARNING after fine_lu: wrong values in TSLB ***', MINVAL(nest%tslb)
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jps-jpe,'(1X,I6))'
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
             DO k=1,config_flags%num_soil_layers
                WRITE(message,FMT='(I1)') k
                CALL wrf_debug ( 0 , message )
@@ -844,7 +844,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 
             WRITE(message,FMT='(A)') '*** SMOIS ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jps-jpe,'(1X,I6))'
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
             DO k=1,config_flags%num_soil_layers
                WRITE(message,FMT='(I1)') k
                CALL wrf_debug ( 0 , message )
