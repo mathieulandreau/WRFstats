@@ -815,8 +815,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             DO k=1,config_flags%num_soil_layers
                WRITE(message,FMT='(I1)') k
                CALL wrf_debug ( 0 , message )
-               DO i=ipe,ips
-                  WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=jpe,jps)
+               DO i=ips,ipe
+                  WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=jps,jpe)
                   CALL wrf_debug ( 0 , message )
                END DO
             END DO
@@ -841,6 +841,18 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                0.0, 0.99 &
             )
+
+            WRITE(message,FMT='(A)') '*** SMOIS ***'
+            CALL wrf_debug ( 0 , message )
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
+            DO k=1,config_flags%num_soil_layers
+               WRITE(message,FMT='(I1)') k
+               CALL wrf_debug ( 0 , message )
+               DO i=ips,ipe
+                  WRITE(message,FMT=rowfmt) (nest%smois(i,k,j), j=jps,jpe)
+                  CALL wrf_debug ( 0 , message )
+               END DO
+            END DO
          END IF
          IF (nest_config_flags%interp_soil_fine_lu > 2) THEN
             CALL interp_mask_field_fine_lu(&

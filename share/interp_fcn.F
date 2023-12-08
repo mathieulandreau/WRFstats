@@ -5084,7 +5084,7 @@ END MODULE module_interp_info
                                                                dy   * cfld(ci  ,ck,cj+1) ) + &
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
-                        IF ((nfld(ni, nk, nj) .LE. 273.15)) THEN
+                        IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
                            WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
                               nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,')'
                            CALL wrf_message ( message )
@@ -5111,15 +5111,15 @@ END MODULE module_interp_info
                       END IF
                       value = sum / REAL ( icount )
 
-                      IF (value .LE. 273.15) THEN
-                        WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',&
-                        value,'at (ni, nk, nj) = ',ni,nk,nj,')'
+                      IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
+                        WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',value,&
+                        'at (ni, nk, nj) = ',ni,nk,nj,')'
                         CALL wrf_message ( message )
                       END IF
                     END IF
                     IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
-                      WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',&
-                         nfld(ni, nk, nj),'at (ni, nk, nj) = ',ni,nk,nj,'), keep the wrfinput file value instead'
+                      WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',value,& 
+                      ' at (ni, nk, nj) = ',ni,nk,nj,'), keep the wrfinput file value instead'
                       CALL wrf_message ( message )
                     ELSE
                       nfld(ni, nk, nj) = value
