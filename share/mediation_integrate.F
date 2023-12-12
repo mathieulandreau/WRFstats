@@ -811,7 +811,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
          IF (MINVAL(nest%tslb) < 200.0) THEN
             WRITE(message,FMT='(A,F10.5)') '*** WARNING after fine_lu: wrong values in TSLB ***', MINVAL(nest%tslb)
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
                WRITE(message,FMT='(I1)') k
                CALL wrf_debug ( 0 , message )
@@ -844,7 +844,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 
             WRITE(message,FMT='(A)') '*** SMOIS ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,I6))'
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
                WRITE(message,FMT='(I1)') k
                CALL wrf_debug ( 0 , message )
@@ -873,6 +873,13 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                274.0, 350.0 &
             )
+            WRITE(message,FMT='(A)') '*** TSK ***'
+            CALL wrf_debug ( 0 , message )
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            DO i=ips,ipe
+               WRITE(message,FMT=rowfmt) (nest%tsk(i,j), j=jps,jpe)
+               CALL wrf_debug ( 0 , message )
+            END DO
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%smcrel,1)*SIZE(nest%intermediate_grid%smcrel,3) .GT. 1),&
                nest%intermediate_grid%smcrel,&
@@ -891,6 +898,19 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                0.0, 1.0 &
             )
+
+            WRITE(message,FMT='(A)') '*** SMCREL ***'
+            CALL wrf_debug ( 0 , message )
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            DO k=1,config_flags%num_soil_layers
+               WRITE(message,FMT='(I1)') k
+               CALL wrf_debug ( 0 , message )
+               DO i=ips,ipe
+                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,k,j), j=jps,jpe)
+                  CALL wrf_debug ( 0 , message )
+               END DO
+            END DO
+
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%sh2o,1)*SIZE(nest%intermediate_grid%sh2o,3) .GT. 1),&
                nest%intermediate_grid%sh2o,&
@@ -909,6 +929,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%intermediate_grid%iswater, nest%iswater,&
                0.0, 0.99 &
             )
+            WRITE(message,FMT='(A)') '*** SH2O ***'
+            CALL wrf_debug ( 0 , message )
+            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            DO k=1,config_flags%num_soil_layers
+               WRITE(message,FMT='(I1)') k
+               CALL wrf_debug ( 0 , message )
+               DO i=ips,ipe
+                  WRITE(message,FMT=rowfmt) (nest%sh2o(i,k,j), j=jps,jpe)
+                  CALL wrf_debug ( 0 , message )
+               END DO
+            END DO
          END IF
          WRITE(message,FMT='(A)') '*** End of interp_soil_fine_lu'
          CALL wrf_debug ( 0 , message )
