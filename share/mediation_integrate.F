@@ -888,7 +888,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                WRITE(message,FMT='(A, I4)')"i", i
                CALL wrf_debug ( 0 , message )
                DO j=jps,jpe-5,5
-                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,jj), jj=j,j+4)
+                  WRITE(message,FMT=rowfmt) (nest%tsk(i,jj), jj=j,j+4)
                   CALL wrf_debug ( 0 , message )
                END DO
             END DO
