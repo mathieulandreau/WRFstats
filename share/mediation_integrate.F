@@ -533,7 +533,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
    CHARACTER * 256        :: message, rowfmt
    INTEGER                :: fid
    INTEGER                :: ierr
-   INTEGER                :: i , j, rc, k
+   INTEGER                :: i , j, rc, k, jj
    INTEGER                :: ids , ide , jds , jde , kds , kde , &
                              ims , ime , jms , jme , kms , kme , &
                              ips , ipe , jps , jpe , kps , kpe
@@ -819,7 +819,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                   WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
                   DO j=jps,jpe-5,5
-                     WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=j,j+4)
+                     WRITE(message,FMT=rowfmt) (nest%tslb(i,k,jj), jj=j,j+4)
                      CALL wrf_debug ( 0 , message )
                   END DO
                END DO
@@ -856,7 +856,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                   WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
                   DO j=jps,jpe-5,5
-                     WRITE(message,FMT=rowfmt) (nest%smois(i,k,j), j=j,j+4)
+                     WRITE(message,FMT=rowfmt) (nest%smois(i,k,jj), jj=j,j+4)
                      CALL wrf_debug ( 0 , message )
                   END DO
                END DO
@@ -888,7 +888,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                WRITE(message,FMT='(A, I4)')"i", i
                CALL wrf_debug ( 0 , message )
                DO j=jps,jpe-5,5
-                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,j), j=j,j+4)
+                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,jj), jj=j,j+4)
                   CALL wrf_debug ( 0 , message )
                END DO
             END DO
@@ -921,7 +921,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                   WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
                   DO j=jps,jpe-5,5
-                     WRITE(message,FMT=rowfmt) (nest%smcrel(i,k,j), j=j,j+4)
+                     WRITE(message,FMT=rowfmt) (nest%smcrel(i,k,jj), jj=j,j+4)
                      CALL wrf_debug ( 0 , message )
                   END DO
                END DO
@@ -955,7 +955,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                   WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
                   DO j=jps,jpe-5,5
-                     WRITE(message,FMT=rowfmt) (nest%sh2o(i,k,j), j=j,j+4)
+                     WRITE(message,FMT=rowfmt) (nest%sh2o(i,k,jj), jj=j,j+4)
                      CALL wrf_debug ( 0 , message )
                   END DO
                END DO
