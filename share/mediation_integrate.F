@@ -811,13 +811,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
          IF (MINVAL(nest%tslb) < 200.0) THEN
             WRITE(message,FMT='(A,F10.5)') '*** WARNING after fine_lu: wrong values in TSLB ***', MINVAL(nest%tslb)
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            rowfmt = '(5(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
-               WRITE(message,FMT='(I1)') k
+               WRITE(message,FMT='(A, I1)')"k", k
                CALL wrf_debug ( 0 , message )
                DO i=ips,ipe
-                  WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=jps,jpe)
+                  WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
+                  DO j=jps,jpe-5,5
+                     WRITE(message,FMT=rowfmt) (nest%tslb(i,k,j), j=j,j+4)
+                     CALL wrf_debug ( 0 , message )
+                  END DO
                END DO
             END DO
          END IF
@@ -844,13 +848,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 
             WRITE(message,FMT='(A)') '*** SMOIS ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            rowfmt = '(5(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
-               WRITE(message,FMT='(I1)') k
+               WRITE(message,FMT='(A, I1)')"k", k
                CALL wrf_debug ( 0 , message )
                DO i=ips,ipe
-                  WRITE(message,FMT=rowfmt) (nest%smois(i,k,j), j=jps,jpe)
+                  WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
+                  DO j=jps,jpe-5,5
+                     WRITE(message,FMT=rowfmt) (nest%smois(i,k,j), j=j,j+4)
+                     CALL wrf_debug ( 0 , message )
+                  END DO
                END DO
             END DO
          END IF
@@ -875,10 +883,14 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             )
             WRITE(message,FMT='(A)') '*** TSK ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            rowfmt = '(5(1X,F10.5))'
             DO i=ips,ipe
-               WRITE(message,FMT=rowfmt) (nest%tsk(i,j), j=jps,jpe)
+               WRITE(message,FMT='(A, I4)')"i", i
                CALL wrf_debug ( 0 , message )
+               DO j=jps,jpe-5,5
+                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,j), j=j,j+4)
+                  CALL wrf_debug ( 0 , message )
+               END DO
             END DO
             CALL interp_mask_field_fine_lu(&
                (SIZE(nest%intermediate_grid%smcrel,1)*SIZE(nest%intermediate_grid%smcrel,3) .GT. 1),&
@@ -901,13 +913,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
 
             WRITE(message,FMT='(A)') '*** SMCREL ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            rowfmt = '(5(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
-               WRITE(message,FMT='(I1)') k
+               WRITE(message,FMT='(A, I1)')"k", k
                CALL wrf_debug ( 0 , message )
                DO i=ips,ipe
-                  WRITE(message,FMT=rowfmt) (nest%smcrel(i,k,j), j=jps,jpe)
+                  WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
+                  DO j=jps,jpe-5,5
+                     WRITE(message,FMT=rowfmt) (nest%smcrel(i,k,j), j=j,j+4)
+                     CALL wrf_debug ( 0 , message )
+                  END DO
                END DO
             END DO
 
@@ -931,13 +947,17 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             )
             WRITE(message,FMT='(A)') '*** SH2O ***'
             CALL wrf_debug ( 0 , message )
-            WRITE(rowfmt,'(A,I4,A)') '(',jpe-jps,'(1X,F10.5))'
+            rowfmt = '(5(1X,F10.5))'
             DO k=1,config_flags%num_soil_layers
-               WRITE(message,FMT='(I1)') k
+               WRITE(message,FMT='(A, I1)')"k", k
                CALL wrf_debug ( 0 , message )
                DO i=ips,ipe
-                  WRITE(message,FMT=rowfmt) (nest%sh2o(i,k,j), j=jps,jpe)
+                  WRITE(message,FMT='(A, I4)')"i", i
                   CALL wrf_debug ( 0 , message )
+                  DO j=jps,jpe-5,5
+                     WRITE(message,FMT=rowfmt) (nest%sh2o(i,k,j), j=j,j+4)
+                     CALL wrf_debug ( 0 , message )
+                  END DO
                END DO
             END DO
          END IF
