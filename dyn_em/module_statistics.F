@@ -146,7 +146,9 @@ CONTAINS
     rhod, & !dry density
     rhov, & !water vapor density
     rho,  & !total density
-    tke   !tke_pbl in RANS with MYJ scheme, tke_sfs for LES with TKE scheme, 0 otherwhile
+    tke,  & !tke_pbl in RANS with MYJ scheme, tke_sfs for LES with TKE scheme, 0 otherwhile
+    pb,   & !base pressure
+    tv      !moist temperature
 
     if (output_stats > 0) then
       ! Note : These two lines are different than in upd_avgflx update because avgflx_count is incremented after
@@ -205,10 +207,12 @@ CONTAINS
         pt = grid%pt(i,k,j) !I don't know if it is dry or moist, I assume dry
         ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
-        t = (pt + T0) * (p0/(p+grid%pb(i,k,j)))**rcp
-        rhod = p/(R_d*t)
+        pb = grid%pb(i,k,j)
+        t = (pt+T0) * (p0/(p+pb))**(-rcp)
+        tv = t * (1.+R_v/R_d*qv)
+        rhod = (p+pb)/(R_d*tv)
         rhov = rhod*qv
-        rho = rhod*(1.0+q)
+        rho = rhod*(1.+q)
         t = t - T0
         !The calculation of time-average values is basic :
         ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
