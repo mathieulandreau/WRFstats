@@ -557,6 +557,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                          ,save_glw                &
                                          ,save_hfx                &
                                          ,save_qfx                &
+                                         ,save_tsk                &
+                                         ,save_swdown             &
                                          ,save_udrunoff
 
 
@@ -826,6 +828,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      ALLOCATE( save_glw(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_hfx(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_qfx(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_tsk(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_swdown(ims:ime,jms:jme) ) !ML Issue #1947
      save_acsnow       = parent%acsnow
      save_acsnom       = parent%acsnom
      save_cuppt        = parent%cuppt
@@ -837,6 +841,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      save_glw          = parent%glw !ML Issue #1947
      save_hfx          = parent%hfx !ML Issue #1947
      save_qfx          = parent%qfx !ML Issue #1947
+     save_tsk          = parent%tsk !ML Issue #1947
+     save_swdown       = parent%swdown !ML Issue #1947
      save_itimestep    = parent%itimestep 
      parent%imask_nostag = 1
      parent%imask_xstag = 1
@@ -857,6 +863,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      parent%glw        = save_glw !ML Issue #1947
      parent%hfx        = save_hfx !ML Issue #1947
      parent%qfx        = save_qfx !ML Issue #1947
+     parent%tsk        = save_tsk !ML Issue #1947
+     parent%swdown     = save_swdown !ML Issue #1947
      parent%itimestep  = save_itimestep
      DEALLOCATE( save_acsnow )
      DEALLOCATE( save_acsnom )
@@ -868,6 +876,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      DEALLOCATE( save_glw ) !ML Issue #1947
      DEALLOCATE( save_hfx ) !ML Issue #1947
      DEALLOCATE( save_qfx ) !ML Issue #1947
+     DEALLOCATE( save_tsk ) !ML Issue #1947
+     DEALLOCATE( save_swdown ) !ML Issue #1947
      DEALLOCATE( save_udrunoff )
 ! end of kludge: 20040604
      CALL pop_communicators_for_domain
