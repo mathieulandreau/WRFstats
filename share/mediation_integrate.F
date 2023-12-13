@@ -554,6 +554,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                          ,save_rainnc             &
                                          ,save_sfcevp             &
                                          ,save_sfcrunoff          &
+                                         ,save_glw                &
                                          ,save_udrunoff
 
 
@@ -820,6 +821,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      ALLOCATE( save_sfcevp(ims:ime,jms:jme) )
      ALLOCATE( save_sfcrunoff(ims:ime,jms:jme) )
      ALLOCATE( save_udrunoff(ims:ime,jms:jme) )
+     ALLOCATE( save_glw(ims:ime,jms:jme) ) !ML Issue #1947
      save_acsnow       = parent%acsnow
      save_acsnom       = parent%acsnom
      save_cuppt        = parent%cuppt
@@ -828,7 +830,8 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      save_sfcevp       = parent%sfcevp
      save_sfcrunoff    = parent%sfcrunoff
      save_udrunoff     = parent%udrunoff
-     save_itimestep    = parent%itimestep
+     save_glw          = parent%glw !ML Issue #1947
+     save_itimestep    = parent%itimestep 
      parent%imask_nostag = 1
      parent%imask_xstag = 1
      parent%imask_ystag = 1
@@ -845,6 +848,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      parent%sfcevp     = save_sfcevp
      parent%sfcrunoff  = save_sfcrunoff
      parent%udrunoff   = save_udrunoff
+     parent%glw        = save_glw !ML Issue #1947
      parent%itimestep  = save_itimestep
      DEALLOCATE( save_acsnow )
      DEALLOCATE( save_acsnom )
@@ -853,6 +857,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      DEALLOCATE( save_rainnc )
      DEALLOCATE( save_sfcevp )
      DEALLOCATE( save_sfcrunoff )
+     DEALLOCATE( save_glw ) !ML Issue #1947
      DEALLOCATE( save_udrunoff )
 ! end of kludge: 20040604
      CALL pop_communicators_for_domain
