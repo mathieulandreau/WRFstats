@@ -843,7 +843,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
                nest%intermediate_grid%iswater, nest%iswater,&
-               0.0, 0.99 &
+               0.01, 0.99 &
             )
 
             WRITE(message,FMT='(A)') '*** SMOIS ***'
@@ -908,7 +908,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
                nest%intermediate_grid%iswater, nest%iswater,&
-               0.0, 1.0 &
+               0.01, 1.0 &
             )
 
             WRITE(message,FMT='(A)') '*** SMCREL ***'
@@ -943,7 +943,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                nest%parent_grid_ratio, nest%parent_grid_ratio,&
                nest%intermediate_grid%lu_index, nest%lu_index,&
                nest%intermediate_grid%iswater, nest%iswater,&
-               0.0, 0.99 &
+               0.01, 0.99 &
             )
             WRITE(message,FMT='(A)') '*** SH2O ***'
             CALL wrf_debug ( 0 , message )
