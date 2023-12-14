@@ -563,11 +563,11 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                          ,save_canwat             &
                                          ,save_emiss              &
                                          ,save_pblh               &
-                                         ,save_tke_pbl            &
                                          ,save_u10e               &
                                          ,save_ust                &
                                          ,save_v10e               &
                                          ,save_udrunoff
+   REAL, ALLOCATABLE, DIMENSION(:,:,:) ::   save_tke_pbl
 
 
    INTERFACE
@@ -842,7 +842,7 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      ALLOCATE( save_canwat(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_emiss(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_pblh(ims:ime,jms:jme) ) !ML Issue #1947
-     ALLOCATE( save_tke_pbl(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_tke_pbl(ims:ime,kms:kme,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_u10e(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_ust(ims:ime,jms:jme) ) !ML Issue #1947
      ALLOCATE( save_v10e(ims:ime,jms:jme) ) !ML Issue #1947
