@@ -587,7 +587,20 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                          ,save_rainnc             &
                                          ,save_sfcevp             &
                                          ,save_sfcrunoff          &
+                                         ,save_glw                &
+                                         ,save_hfx                &
+                                         ,save_qfx                &
+                                         ,save_tsk                &
+                                         ,save_swdown             &
+                                         ,save_albedo             &
+                                         ,save_canwat             &
+                                         ,save_emiss              &
+                                         ,save_pblh               &
+                                         ,save_u10e               &
+                                         ,save_ust                &
+                                         ,save_v10e               &
                                          ,save_udrunoff
+   REAL, ALLOCATABLE, DIMENSION(:,:,:) ::   save_tke_pbl
 
 
    INTERFACE
@@ -1044,6 +1057,19 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      ALLOCATE( save_sfcevp(ims:ime,jms:jme) )
      ALLOCATE( save_sfcrunoff(ims:ime,jms:jme) )
      ALLOCATE( save_udrunoff(ims:ime,jms:jme) )
+     ALLOCATE( save_glw(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_hfx(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_qfx(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_tsk(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_swdown(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_albedo(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_canwat(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_emiss(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_pblh(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_tke_pbl(ims:ime,kms:kme,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_u10e(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_ust(ims:ime,jms:jme) ) !ML Issue #1947
+     ALLOCATE( save_v10e(ims:ime,jms:jme) ) !ML Issue #1947
      save_acsnow       = parent%acsnow
      save_acsnom       = parent%acsnom
      save_cuppt        = parent%cuppt
@@ -1052,7 +1078,19 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      save_sfcevp       = parent%sfcevp
      save_sfcrunoff    = parent%sfcrunoff
      save_udrunoff     = parent%udrunoff
-     save_itimestep    = parent%itimestep
+     save_glw          = parent%glw !ML Issue #1947
+     save_hfx          = parent%hfx !ML Issue #1947
+     save_qfx          = parent%qfx !ML Issue #1947
+     save_tsk          = parent%tsk !ML Issue #1947
+     save_swdown       = parent%swdown !ML Issue #1947
+     save_albedo       = parent%albedo !ML Issue #1947
+     save_canwat       = parent%canwat !ML Issue #1947
+     save_emiss        = parent%emiss !ML Issue #1947
+     save_pblh         = parent%pblh !ML Issue #1947
+     save_tke_pbl      = parent%tke_pbl !ML Issue #1947
+     save_u10e         = parent%u10e !ML Issue #1947
+     save_ust          = parent%ust !ML Issue #1947
+     save_v10e         = parent%v10e !ML Issue #1947
      parent%imask_nostag = 1
      parent%imask_xstag = 1
      parent%imask_ystag = 1
@@ -1069,6 +1107,19 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      parent%sfcevp     = save_sfcevp
      parent%sfcrunoff  = save_sfcrunoff
      parent%udrunoff   = save_udrunoff
+     parent%glw        = save_glw !ML Issue #1947
+     parent%hfx        = save_hfx !ML Issue #1947
+     parent%qfx        = save_qfx !ML Issue #1947
+     parent%tsk        = save_tsk !ML Issue #1947
+     parent%swdown     = save_swdown !ML Issue #1947
+     parent%albedo     = save_albedo !ML Issue #1947
+     parent%canwat     = save_canwat !ML Issue #1947
+     parent%emiss      = save_emiss !ML Issue #1947
+     parent%pblh       = save_pblh !ML Issue #1947
+     parent%tke_pbl    = save_tke_pbl !ML Issue #1947
+     parent%u10e       = save_u10e !ML Issue #1947
+     parent%ust        = save_ust !ML Issue #1947
+     parent%v10e       = save_v10e !ML Issue #1947
      parent%itimestep  = save_itimestep
      DEALLOCATE( save_acsnow )
      DEALLOCATE( save_acsnom )
@@ -1077,6 +1128,19 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
      DEALLOCATE( save_rainnc )
      DEALLOCATE( save_sfcevp )
      DEALLOCATE( save_sfcrunoff )
+     DEALLOCATE( save_glw ) !ML Issue #1947
+     DEALLOCATE( save_hfx ) !ML Issue #1947
+     DEALLOCATE( save_qfx ) !ML Issue #1947
+     DEALLOCATE( save_tsk ) !ML Issue #1947
+     DEALLOCATE( save_swdown ) !ML Issue #1947
+     DEALLOCATE( save_albedo ) !ML Issue #1947
+     DEALLOCATE( save_canwat ) !ML Issue #1947
+     DEALLOCATE( save_emiss ) !ML Issue #1947
+     DEALLOCATE( save_pblh ) !ML Issue #1947
+     DEALLOCATE( save_tke_pbl ) !ML Issue #1947
+     DEALLOCATE( save_u10e ) !ML Issue #1947
+     DEALLOCATE( save_ust ) !ML Issue #1947
+     DEALLOCATE( save_v10e ) !ML Issue #1947
      DEALLOCATE( save_udrunoff )
 ! end of kludge: 20040604
      CALL pop_communicators_for_domain
