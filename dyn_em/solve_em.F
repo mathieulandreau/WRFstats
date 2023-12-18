@@ -4779,11 +4779,12 @@ BENCH_END(bc_2d_tim)
          old_dt=min(old_dt,grid%dt)
          num = INT(old_dt * precision)
          den = precision
+         CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ELSE
-         den = config_flags%time_step_fract_den
-         num = den*config_flags%time_step + config_flags%time_step_fract_num
+         !den = config_flags%time_step_fract_den
+         !num = den*config_flags%time_step + config_flags%time_step_fract_num
+         dtInterval = grid%dt
       ENDIF
-      CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       IF (CurrTime .lt. temp_time + dtInterval) THEN
          WRITE ( message , FMT = '("solve_em: initializing avgflx and/or statistics at time ",A," on domain ",I3)' ) &
               & TRIM(message2), grid%id
