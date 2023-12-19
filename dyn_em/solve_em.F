@@ -4807,18 +4807,14 @@ BENCH_END(bc_2d_tim)
           WRITE ( message , FMT = '(A)' ) "parent%parent(1)%ptr is associated"
           CALL wrf_message(trim(message)) 
          END IF
-         IF(grid%id .GT. 1) THEN
-          DO WHILE (ASSOCIATED(parent%parents(1)%ptr))
-              parent => parent%parents(1)%ptr
-              WRITE ( message , FMT = '("id = ",I4)' ) parent%id
-              CALL wrf_message(trim(message)) 
-              IF (parent%id .GT. 1 ) THEN
-                den = den * parent%parent_grid_ratio
-              END IF
-              WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
-              CALL wrf_message(trim(message)) 
-          END DO
-         END IF
+         DO WHILE (parent%id .GT. 1 )
+            parent => parent%parents(1)%ptr
+            WRITE ( message , FMT = '("id = ",I4)' ) parent%id
+            CALL wrf_message(trim(message)) 
+            den = den * parent%parent_grid_ratio
+            WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
+            CALL wrf_message(trim(message)) 
+         END DO
          !NULLIFY(parent)
          CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ENDIF
