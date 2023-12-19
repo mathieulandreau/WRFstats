@@ -4784,38 +4784,13 @@ BENCH_END(bc_2d_tim)
       ELSE
          den = config_flags%time_step_fract_den
          num = den*config_flags%time_step + config_flags%time_step_fract_num
-         CALL WRFU_TimeIntervalSet(dtInterval, S_=REAL(grid%dt,8))
-         WRITE ( message , FMT = '("grid%dt = ",F10.5)' ) REAL(grid%dt,8)
-         CALL wrf_message(trim(message)) 
-         WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
-         CALL wrf_message(trim(message)) 
-         WRITE ( message , FMT = '("num = ",F10.5)' ) REAL(num,8)
-         CALL wrf_message(trim(message)) 
+         !CALL WRFU_TimeIntervalSet(dtInterval, S_=REAL(grid%dt,8))
          den = den * grid%parent_grid_ratio
-         WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
-         CALL wrf_message(trim(message)) 
          parent => grid
-         IF (ASSOCIATED(parent)) THEN
-          WRITE ( message , FMT = '(A)' ) "parent is associated"
-          CALL wrf_message(trim(message)) 
-         END IF
-         IF (ASSOCIATED(grid%parents(1)%ptr)) THEN
-          WRITE ( message , FMT = '(A)' ) "grid%parent(1)%ptr is associated"
-          CALL wrf_message(trim(message)) 
-         END IF
-         IF (ASSOCIATED(parent%parents(1)%ptr)) THEN
-          WRITE ( message , FMT = '(A)' ) "parent%parent(1)%ptr is associated"
-          CALL wrf_message(trim(message)) 
-         END IF
          DO WHILE (parent%id .GT. 1 )
             parent => parent%parents(1)%ptr
-            WRITE ( message , FMT = '("id = ",I4)' ) parent%id
-            CALL wrf_message(trim(message)) 
             den = den * parent%parent_grid_ratio
-            WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
-            CALL wrf_message(trim(message)) 
          END DO
-         !NULLIFY(parent)
          CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ENDIF
       IF (CurrTime .lt. temp_time + dtInterval) THEN
