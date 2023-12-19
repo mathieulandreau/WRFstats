@@ -212,6 +212,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    INTEGER, PARAMETER                         :: precision = 100
    INTEGER                                    :: num, den
    TYPE(WRFU_TimeInterval)                    :: dtInterval, intervaltime,restartinterval
+   TYPE(domain), POINTER                      :: parent
 
 #if (WRF_CMAQ == 1)
    interface
@@ -930,7 +931,7 @@ BENCH_END(rk_tend_tim)
        END DO
      
        IF (grid%max_horiz_cfl .GT. grid%max_cfl_val) THEN
-         grid%max_cfl_val = grid%max_horiz_cfl
+         grid%max_cfl_val = grid%max_horiz_cflcurr_secs
        ENDIF
        IF (grid%max_vert_cfl .GT. grid%max_cfl_val) THEN
          grid%max_cfl_val = grid%max_vert_cfl
@@ -4781,9 +4782,29 @@ BENCH_END(bc_2d_tim)
          den = precision
          CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ELSE
-         !den = config_flags%time_step_fract_den
-         !num = den*config_flags%time_step + config_flags%time_step_fract_num
+         den = config_flags%time_step_fract_den
+         num = den*config_flags%time_step + config_flags%time_step_fract_num
          CALL WRFU_TimeIntervalSet(dtInterval, S_=REAL(grid%dt,8))
+         WRITE ( message , FMT = '("grid%dt = ",F10.5)' ) REAL(grid%dt,8)
+         CALL wrf_message(trim(message)) 
+         WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
+         CALL wrf_message(trim(message)) 
+         WRITE ( message , FMT = '("num = ",F10.5)' ) REAL(num,8)
+         CALL wrf_message(trim(message)) 
+         den = den * grid%parent_grid_ratio
+         WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
+         CALL wrf_message(trim(message)) 
+         parent => grid
+         DO WHILE (ASSOCIATED(parent%parents(1)%ptr))
+            parent => parent%parents(1)%ptr
+            den = den * parent%parent_grid_ratio
+            WRITE ( message , FMT = '("id = ",I4)' ) parent%id
+            CALL wrf_message(trim(message)) 
+            WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
+            CALL wrf_message(trim(message)) 
+         END DO
+         NULLIFY(parent)
+         CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ENDIF
       IF (CurrTime .lt. temp_time + dtInterval) THEN
          WRITE ( message , FMT = '("solve_em: initializing avgflx and/or statistics at time ",A," on domain ",I3)' ) &
