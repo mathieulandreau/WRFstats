@@ -4810,9 +4810,11 @@ BENCH_END(bc_2d_tim)
          IF(grid%id .GT. 1) THEN
           DO WHILE (ASSOCIATED(parent%parents(1)%ptr))
               parent => parent%parents(1)%ptr
-              den = den * parent%parent_grid_ratio
               WRITE ( message , FMT = '("id = ",I4)' ) parent%id
               CALL wrf_message(trim(message)) 
+              IF (parent%id .GT. 1 ) THEN
+                den = den * parent%parent_grid_ratio
+              END IF
               WRITE ( message , FMT = '("den = ",F10.5)' ) REAL(den,8)
               CALL wrf_message(trim(message)) 
           END DO
