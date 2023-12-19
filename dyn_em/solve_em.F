@@ -212,6 +212,7 @@ SUBROUTINE solve_em ( grid , config_flags  &
    INTEGER, PARAMETER                         :: precision = 100
    INTEGER                                    :: num, den
    TYPE(WRFU_TimeInterval)                    :: dtInterval, intervaltime,restartinterval
+   TYPE(domain), POINTER                      :: parent
 
 #if (WRF_CMAQ == 1)
    interface
@@ -4781,9 +4782,16 @@ BENCH_END(bc_2d_tim)
          den = precision
          CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ELSE
-         !den = config_flags%time_step_fract_den
-         !num = den*config_flags%time_step + config_flags%time_step_fract_num
-         CALL WRFU_TimeIntervalSet(dtInterval, S_=REAL(grid%dt,8))
+         den = config_flags%time_step_fract_den
+         num = den*config_flags%time_step + config_flags%time_step_fract_num
+         !CALL WRFU_TimeIntervalSet(dtInterval, S_=REAL(grid%dt,8))
+         den = den * grid%parent_grid_ratio
+         parent => grid
+         DO WHILE (parent%id .GT. 1 )
+            parent => parent%parents(1)%ptr
+            den = den * parent%parent_grid_ratio
+         END DO
+         CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ENDIF
       IF (CurrTime .lt. temp_time + dtInterval) THEN
          WRITE ( message , FMT = '("solve_em: initializing avgflx and/or statistics at time ",A," on domain ",I3)' ) &
