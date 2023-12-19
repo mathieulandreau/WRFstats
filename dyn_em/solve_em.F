@@ -931,7 +931,7 @@ BENCH_END(rk_tend_tim)
        END DO
      
        IF (grid%max_horiz_cfl .GT. grid%max_cfl_val) THEN
-         grid%max_cfl_val = grid%max_horiz_cflcurr_secs
+         grid%max_cfl_val = grid%max_horiz_cfl
        ENDIF
        IF (grid%max_vert_cfl .GT. grid%max_cfl_val) THEN
          grid%max_cfl_val = grid%max_vert_cfl
