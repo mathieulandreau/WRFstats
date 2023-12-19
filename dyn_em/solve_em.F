@@ -4799,10 +4799,8 @@ BENCH_END(bc_2d_tim)
           WRITE ( message , FMT = '(A)' ) "parent is associated"
           CALL wrf_message(trim(message)) 
          END IF
-         IF (ASSOCIATED(parent%parents(1))) THEN
-          WRITE ( message , FMT = '(A)' ) "parent%parent(1) is associated"
-          CALL wrf_message(trim(message)) 
-          WRITE ( message , FMT = '("id = ",I4)' ) parent%parents(1)%id
+         IF (ASSOCIATED(grid%parents(1)%ptr)) THEN
+          WRITE ( message , FMT = '(A)' ) "grid%parent(1)%ptr is associated"
           CALL wrf_message(trim(message)) 
          END IF
          IF (ASSOCIATED(parent%parents(1)%ptr)) THEN
@@ -4819,7 +4817,7 @@ BENCH_END(bc_2d_tim)
               CALL wrf_message(trim(message)) 
           END DO
          END IF
-         NULLIFY(parent)
+         !NULLIFY(parent)
          CALL WRFU_TimeIntervalSet(dtInterval, Sn=num, Sd=den)
       ENDIF
       IF (CurrTime .lt. temp_time + dtInterval) THEN
