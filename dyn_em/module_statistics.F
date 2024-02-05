@@ -150,6 +150,7 @@ CONTAINS
     pt,   & !dry theta perturbation (PT-300K)
     ptv,  & !moist theta perturbation (PTV-300K)
     p,    & !pressure perturbation (P-P_BASE)
+    p_hyd,& !hydrostatic pressure
     zp,   & !zp perturbation (PHI - PHI_BASE)/g
     t,    & !temperature perturbation (T-300K)
     rhod, & !dry density
