@@ -8,11 +8,11 @@ state   integer stats_count  -      dyn_em     -    -    r     "stats_count"  "C
 # Average values
 state   real    mu_avg       ij     dyn_em     1    -    h{24} "MU_AVG"       "time-avg. dry air mass perturbation in column"  "Pa"
 state   real    psfc_avg     ij     dyn_em     1    -    h{24} "PSFC_AVG"     "time-avg. surface pressure"  "Pa"
-state   real    q2_avg       ij     dyn_em     1    -    h{24} "Q2_AVG"       "time-avg. 2m QV"  ""
-state   real    t2_avg       ij     dyn_em     1    -    h{24} "T2_AVG"       "time-avg. 2m TEMP"  "K"
-state   real    pt2_avg      ij     dyn_em     1    -    h{24} "PT2_AVG"      "time-avg. 2m POT TEMP"  "K"
-state   real    u10_avg      ij     dyn_em     1    -    h{24} "U10_AVG"      "time-avg. 10m U"  "m s-1"
-state   real    v10_avg      ij     dyn_em     1    -    h{24} "V10_AVG"      "time-avg. 10m V"  "m s-1"
+state   real    q2m_avg      ij     dyn_em     1    -    h{24} "Q2M_AVG"      "time-avg. 2m QV"  ""
+state   real    t2m_avg      ij     dyn_em     1    -    h{24} "T2M_AVG"      "time-avg. 2m TEMP"  "K"
+state   real    pt2m_avg     ij     dyn_em     1    -    h{24} "PT2M_AVG"     "time-avg. 2m POT TEMP"  "K"
+state   real    u10m_avg     ij     dyn_em     1    -    h{24} "U10M_AVG"     "time-avg. 10m U"  "m s-1"
+state   real    v10m_avg     ij     dyn_em     1    -    h{24} "V10M_AVG"     "time-avg. 10m V"  "m s-1"
 state   real    tsk_avg      ij     dyn_em     1    -    h{24} "TSK_AVG"      "time-avg. TSK"  "K"
 state   real    ust_avg      ij     dyn_em     1    -    h{24} "UST_AVG"      "time-avg. U*"  "m s-1"
 state   real    pblh_avg     ij     dyn_em     1    -    h{24} "PBLH_AVG"     "time-avg. PBL HEIGHT"  "m"
@@ -84,11 +84,11 @@ rconfig  integer  output_stats             namelist,diag    max_domains    0    
 # Packages
 
 
-#mu_avg,psfc_avg,q2_avg,t2_avg,pt2_avg,u10_avg,v10_avg,tsk_avg,ust_avg,pblh_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg
+#mu_avg,psfc_avg,q2m_avg,t2m_avg,pt2m_avg,u10m_avg,v10m_avg,tsk_avg,ust_avg,pblh_avg,z_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg
 #u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,qvpt_avg,up_avg,vp_avg,wp_avg
 #u3_avg,v3_avg,w3_avg 
 
-package  stats_1     output_stats==1            -  state:mu_avg,psfc_avg,q2_avg,t2_avg,pt2_avg,u10_avg,v10_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg
-package  stats_2     output_stats==2            -  state:mu_avg,psfc_avg,q2_avg,t2_avg,pt2_avg,u10_avg,v10_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg
-package  stats_3     output_stats==3            -  state:mu_avg,psfc_avg,q2_avg,t2_avg,pt2_avg,u10_avg,v10_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg,u3_avg,v3_avg,w3_avg
+package  stats_1     output_stats==1            -  state:mu_avg,psfc_avg,q2m_avg,t2m_avg,pt2m_avg,u10m_avg,v10m_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg
+package  stats_2     output_stats==2            -  state:mu_avg,psfc_avg,q2m_avg,t2m_avg,pt2m_avg,u10m_avg,v10m_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg
+package  stats_3     output_stats==3            -  state:mu_avg,psfc_avg,q2m_avg,t2m_avg,pt2m_avg,u10m_avg,v10m_avg,tsk_avg,ust_avg,pblh_avg,zp_avg,u_avg,v_avg,w_avg,pt_avg,ptv_avg,qv_avg,q_avg,p_avg,p_hyd_avg,t_avg,rhov_avg,rhod_avg,rho_avg,u2_avg,v2_avg,w2_avg,pt2_avg,ptv2_avg,q2_avg,qv2_avg,p2_avg,z2_avg,uv_avg,uw_avg,vw_avg,uq_avg,vq_avg,wq_avg,uqv_avg,vqv_avg,wqv_avg,upt_avg,vpt_avg,wpt_avg,uptv_avg,vptv_avg,wptv_avg,up_avg,vp_avg,wp_avg,u3_avg,v3_avg,w3_avg
 #package  sgs_fluxes  output_sgs_fluxes          -  state:ftx_sgs_avg,fty_sgs_avg,ftz_sgs_avg,fqx_sgs_avg,fqy_sgs_avg,fqz_sgs_avg,fux_sgs_avg,fuz_sgs_avg,fvx_sgs_avg,fvy_sgs_avg,fvz_sgs_avg,fwx_sgs_avg,fwy_sgs_avg,fwz_sgs_avg 

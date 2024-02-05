@@ -28,15 +28,15 @@ CONTAINS
     if (output_stats > 0) then
       DO j=jts,jte
       DO i=its,ite
-        grid%mu_avg(i,j) = 0.
+        grid%mu_avg(i,j)   = 0.
         grid%psfc_avg(i,j) = 0.
-        grid%q2_avg(i,j) = 0.
-        grid%t2_avg(i,j) = 0.
-        grid%pt2_avg(i,j) = 0.
-        grid%u10_avg(i,j) = 0.
-        grid%v10_avg(i,j) = 0.
-        grid%tsk_avg(i,j) = 0.
-        grid%ust_avg(i,j) = 0.
+        grid%q2m_avg(i,j)  = 0.
+        grid%t2m_avg(i,j)  = 0.
+        grid%pt2m_avg(i,j) = 0.
+        grid%u10m_avg(i,j) = 0.
+        grid%v10m_avg(i,j) = 0.
+        grid%tsk_avg(i,j)  = 0.
+        grid%ust_avg(i,j)  = 0.
         grid%pblh_avg(i,j) = 0.
       ENDDO
       ENDDO
@@ -181,11 +181,11 @@ CONTAINS
       DO i=its,ite
         grid%mu_avg(i,j)   = (local_count*grid%mu_avg(i,j)    +  grid%mu_2(i,j) ) * one_over_count_p1
         grid%psfc_avg(i,j) = (local_count*grid%psfc_avg(i,j)  +  grid%psfc(i,j) ) * one_over_count_p1
-        grid%q2_avg(i,j)   = (local_count*grid%q2_avg(i,j)    +  grid%q2(i,j) )   * one_over_count_p1
-        grid%t2_avg(i,j)   = (local_count*grid%t2_avg(i,j)    +  grid%t2(i,j) )   * one_over_count_p1
-        grid%pt2_avg(i,j)  = (local_count*grid%pt2_avg(i,j)   +  grid%th2(i,j) )  * one_over_count_p1
-        grid%u10_avg(i,j)  = (local_count*grid%u10_avg(i,j)   +  grid%u10(i,j) )  * one_over_count_p1
-        grid%v10_avg(i,j)  = (local_count*grid%v10_avg(i,j)   +  grid%v10(i,j) )  * one_over_count_p1
+        grid%q2m_avg(i,j)  = (local_count*grid%q2m_avg(i,j)   +  grid%q2(i,j) )   * one_over_count_p1
+        grid%t2m_avg(i,j)  = (local_count*grid%t2m_avg(i,j)   +  grid%t2(i,j) )   * one_over_count_p1
+        grid%pt2m_avg(i,j) = (local_count*grid%pt2m_avg(i,j)  +  grid%th2(i,j) )  * one_over_count_p1
+        grid%u10m_avg(i,j) = (local_count*grid%u10m_avg(i,j)  +  grid%u10(i,j) )  * one_over_count_p1
+        grid%v10m_avg(i,j) = (local_count*grid%v10m_avg(i,j)  +  grid%v10(i,j) )  * one_over_count_p1
         grid%tsk_avg(i,j)  = (local_count*grid%tsk_avg(i,j)   +  grid%tsk(i,j) )  * one_over_count_p1
         grid%ust_avg(i,j)  = (local_count*grid%ust_avg(i,j)   +  grid%ust(i,j) )  * one_over_count_p1
         grid%pblh_avg(i,j) = (local_count*grid%pblh_avg(i,j)  +  grid%pblh(i,j) ) * one_over_count_p1
