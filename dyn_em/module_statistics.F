@@ -28,7 +28,16 @@ CONTAINS
     if (output_stats > 0) then
       DO j=jts,jte
       DO i=its,ite
-        grid%mu_avg(i,j) = 0.
+        grid%mu_avg(i,j)   = 0.
+        grid%psfc_avg(i,j) = 0.
+        grid%q2m_avg(i,j)  = 0.
+        grid%t2m_avg(i,j)  = 0.
+        grid%pt2m_avg(i,j) = 0.
+        grid%u10m_avg(i,j) = 0.
+        grid%v10m_avg(i,j) = 0.
+        grid%tsk_avg(i,j)  = 0.
+        grid%ust_avg(i,j)  = 0.
+        grid%pblh_avg(i,j) = 0.
       ENDDO
       ENDDO
       DO j=jts,jte
@@ -141,6 +150,7 @@ CONTAINS
     pt,   & !dry theta perturbation (PT-300K)
     ptv,  & !moist theta perturbation (PTV-300K)
     p,    & !pressure perturbation (P-P_BASE)
+    p_hyd,& !hydrostatic pressure
     zp,   & !zp perturbation (PHI - PHI_BASE)/g
     t,    & !temperature perturbation (T-300K)
     rhod, & !dry density
@@ -170,7 +180,16 @@ CONTAINS
 
       DO j=jts,jte
       DO i=its,ite
-        grid%mu_avg(i,j) = (local_count*grid%mu_avg(i,j)  +  grid%mu_2(i,j) ) * one_over_count_p1
+        grid%mu_avg(i,j)   = (local_count*grid%mu_avg(i,j)    +  grid%mu_2(i,j) ) * one_over_count_p1
+        grid%psfc_avg(i,j) = (local_count*grid%psfc_avg(i,j)  +  grid%psfc(i,j) ) * one_over_count_p1
+        grid%q2m_avg(i,j)  = (local_count*grid%q2m_avg(i,j)   +  grid%q2(i,j) )   * one_over_count_p1
+        grid%t2m_avg(i,j)  = (local_count*grid%t2m_avg(i,j)   +  grid%t2(i,j) )   * one_over_count_p1
+        grid%pt2m_avg(i,j) = (local_count*grid%pt2m_avg(i,j)  +  grid%th2(i,j) )  * one_over_count_p1
+        grid%u10m_avg(i,j) = (local_count*grid%u10m_avg(i,j)  +  grid%u10(i,j) )  * one_over_count_p1
+        grid%v10m_avg(i,j) = (local_count*grid%v10m_avg(i,j)  +  grid%v10(i,j) )  * one_over_count_p1
+        grid%tsk_avg(i,j)  = (local_count*grid%tsk_avg(i,j)   +  grid%tsk(i,j) )  * one_over_count_p1
+        grid%ust_avg(i,j)  = (local_count*grid%ust_avg(i,j)   +  grid%ust(i,j) )  * one_over_count_p1
+        grid%pblh_avg(i,j) = (local_count*grid%pblh_avg(i,j)  +  grid%pblh(i,j) ) * one_over_count_p1
       ENDDO
       ENDDO
 
@@ -182,6 +201,7 @@ CONTAINS
         w = (grid%w_2(i,k,j)+grid%w_2(i,k+1,j)) * 0.5
         zp = (grid%ph_2(i,k,j)+grid%ph_2(i,k+1,j)) * one_over_2g
         p = grid%p(i,k,j)
+        p_hyd = grid%p_hyd(i,k,j)
         IF (tke_opt == 1) THEN
           tke = grid%tke_2(i,k,j)
         ELSE IF (tke_opt == 2) THEN
@@ -219,20 +239,21 @@ CONTAINS
         ! Then :
         ! <x>_0 = 0.                                      -> computed in zero_statistics
         ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics (here)
-        grid%zp_avg(i,k,j)  = (local_count*grid%zp_avg(i,k,j)  +  zp )   * one_over_count_p1
-        grid%u_avg(i,k,j)   = (local_count*grid%u_avg(i,k,j)   +  u )   * one_over_count_p1
-        grid%v_avg(i,k,j)   = (local_count*grid%v_avg(i,k,j)   +  v )   * one_over_count_p1
-        grid%w_avg(i,k,j)   = (local_count*grid%w_avg(i,k,j)   +  w )   * one_over_count_p1
-        grid%pt_avg(i,k,j)  = (local_count*grid%pt_avg(i,k,j)  +  pt )  * one_over_count_p1
-        grid%ptv_avg(i,k,j) = (local_count*grid%ptv_avg(i,k,j) +  ptv ) * one_over_count_p1
-        grid%qv_avg(i,k,j)  = (local_count*grid%qv_avg(i,k,j)  +  qv )  * one_over_count_p1
-        grid%q_avg(i,k,j)   = (local_count*grid%q_avg(i,k,j)   +  q )   * one_over_count_p1
-        grid%p_avg(i,k,j)   = (local_count*grid%p_avg(i,k,j)   +  p )   * one_over_count_p1
-        grid%tke_avg(i,k,j) = (local_count*grid%tke_avg(i,k,j) +  tke ) * one_over_count_p1
-        grid%rho_avg(i,k,j) = (local_count*grid%rho_avg(i,k,j) +  rho ) * one_over_count_p1
-        grid%rhod_avg(i,k,j)= (local_count*grid%rhod_avg(i,k,j)+  rhod )* one_over_count_p1
-        grid%rhov_avg(i,k,j)= (local_count*grid%rhov_avg(i,k,j)+  rhov )* one_over_count_p1
-        grid%t_avg(i,k,j)   = (local_count*grid%t_avg(i,k,j)   +  t )   * one_over_count_p1
+        grid%zp_avg(i,k,j)      = (local_count*grid%zp_avg(i,k,j)    +  zp )    * one_over_count_p1
+        grid%u_avg(i,k,j)       = (local_count*grid%u_avg(i,k,j)     +  u )     * one_over_count_p1
+        grid%v_avg(i,k,j)       = (local_count*grid%v_avg(i,k,j)     +  v )     * one_over_count_p1
+        grid%w_avg(i,k,j)       = (local_count*grid%w_avg(i,k,j)     +  w )     * one_over_count_p1
+        grid%pt_avg(i,k,j)      = (local_count*grid%pt_avg(i,k,j)    +  pt )    * one_over_count_p1
+        grid%ptv_avg(i,k,j)     = (local_count*grid%ptv_avg(i,k,j)   +  ptv )   * one_over_count_p1
+        grid%qv_avg(i,k,j)      = (local_count*grid%qv_avg(i,k,j)    +  qv )    * one_over_count_p1
+        grid%q_avg(i,k,j)       = (local_count*grid%q_avg(i,k,j)     +  q )     * one_over_count_p1
+        grid%p_avg(i,k,j)       = (local_count*grid%p_avg(i,k,j)     +  p )     * one_over_count_p1
+        grid%p_hyd_avg(i,k,j)   = (local_count*grid%p_hyd_avg(i,k,j) +  p_hyd ) * one_over_count_p1
+        grid%tke_avg(i,k,j)     = (local_count*grid%tke_avg(i,k,j)   +  tke )   * one_over_count_p1
+        grid%rho_avg(i,k,j)     = (local_count*grid%rho_avg(i,k,j)   +  rho )   * one_over_count_p1
+        grid%rhod_avg(i,k,j)    = (local_count*grid%rhod_avg(i,k,j)  +  rhod )  * one_over_count_p1
+        grid%rhov_avg(i,k,j)    = (local_count*grid%rhov_avg(i,k,j)  +  rhov )  * one_over_count_p1
+        grid%t_avg(i,k,j)       = (local_count*grid%t_avg(i,k,j)     +  t )     * one_over_count_p1
         if (output_stats > 1) then
           grid%u2_avg(i,k,j)   = (local_count*grid%u2_avg(i,k,j)   +  u*u )     * one_over_count_p1
           grid%v2_avg(i,k,j)   = (local_count*grid%v2_avg(i,k,j)   +  v*v )     * one_over_count_p1
