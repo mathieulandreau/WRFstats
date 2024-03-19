@@ -4978,11 +4978,6 @@ END MODULE module_interp_info
             DO nk = nkts, nkte
                ck = nk
                DO ni = nits, nite
-                  IF ( imask(ni, nj) .NE. 1 ) THEN
-                     WRITE (message, FMT='(A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, cycl at (ni, nk, nj) = ',ni,nk,nj,')'
-                     CALL wrf_message ( message )
-                     cycle
-                  END IF
                   ! first coarse position equal to or to the left of nest point
                   IF ( MOD ( nri , 2 ) .EQ. 0 ) THEN
                      ci = ( ni + (nri/2)-1 ) / nri + ipos -1
@@ -5068,14 +5063,6 @@ END MODULE module_interp_info
                         yy = REAL(cj) + dy
                         value = search_extrap(xx, yy, ck, cfld, cims, cime, &
                                     cjms, cjme, ckms, ckme, 1000.0, ' ', iswater, clu)
-                        IF (value == 1000.0) THEN
-                           CALL wrf_message("***Error in interp_mask_field_fine_lu : No land point found to initialize soil quantities in nest")
-                        END IF
-                        IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
-                           WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, search_extrap returned an invalid value (',&
-                              value,' at (ni, nk, nj) = ',ni,nk,nj,')'
-                           CALL wrf_message ( message )
-                        END IF
                      ! If the surrounding coarse values are all LAND points,
                      ! this is a simple 4-pt interpolation. 
                      ELSE IF (ALL( clu(ci:ci+1,cj:cj+1) /= iswater ) ) THEN
@@ -5084,11 +5071,6 @@ END MODULE module_interp_info
                                                                dy   * cfld(ci  ,ck,cj+1) ) + &
                                                dx   * ( ( 1. - dy ) * cfld(ci+1,ck,cj  )   + &
                                                                dy   * cfld(ci+1,ck,cj+1) )
-                        IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
-                           WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, 4pt returned an invalid value (',&
-                              value,'at (ni, nk, nj) = ',ni,nk,nj,')'
-                           CALL wrf_message ( message )
-                        END IF
                     !  If there are some water points and some land points, take an average.                  
                     ELSE
                       icount = 0
@@ -5110,22 +5092,11 @@ END MODULE module_interp_info
                          sum = sum + cfld(ci+1,ck,cj+1)
                       END IF
                       value = sum / REAL ( icount )
-
-                      IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
-                        WRITE (message, FMT='(A,F10.4,A,3I4,A)') '--- ERROR: in interp_mask_field_fine_lu, averaging returned an invalid value (',value,&
-                        'at (ni, nk, nj) = ',ni,nk,nj,')'
-                        CALL wrf_message ( message )
-                      END IF
                     END IF
-                    IF (((value .LT. minval) .OR. (value .GT. maxval))) THEN
-                      WRITE (message, FMT='(A,F10.4,A,3I4,A,F10.4)') '--- ERROR: in interp_mask_field_fine_lu, (global test) returned an invalid value (',value,& 
-                      ' at (ni, nk, nj) = ',ni,nk,nj,'), keep the wrfinput file value instead : ',nfld(ni, nk, nj)
-                      CALL wrf_message ( message )
-                    ELSE
+                    IF (((value .GE. minval) .AND. (value .LE. maxval))) THEN
                       nfld(ni, nk, nj) = value
                     END IF
                   END IF
-
                END DO
             END DO
           END DO

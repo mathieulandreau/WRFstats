@@ -828,6 +828,9 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
                                    cids, cide, cjds, cjde, ckds, ckde,    &
                                    cims, cime, cjms, cjme, ckms, ckme,    &
                                    cips, cipe, cjps, cjpe, ckps, ckpe    )
+
+         WRITE(message,FMT='(A)') '*** TSLB ***'
+         CALL wrf_debug ( 0 , message )
          CALL interp_mask_field_fine_lu(&
             (SIZE(nest%intermediate_grid%tslb,1)*SIZE(nest%intermediate_grid%tslb,3) .GT. 1),&
             nest%intermediate_grid%tslb,&
@@ -846,94 +849,101 @@ SUBROUTINE med_nest_initial ( parent , nest , config_flags )
             nest%intermediate_grid%iswater, nest%iswater,&
             274.0, 350.0 &
          )
+         WRITE(message,FMT='(A)') '*** TSLB DONE ***'
+         CALL wrf_debug ( 0 , message )
 
-         IF (nest_config_flags%interp_soil_fine_lu > 1) THEN
-            CALL interp_mask_field_fine_lu(&
-               (SIZE(nest%intermediate_grid%smois,1)*SIZE(nest%intermediate_grid%smois,3) .GT. 1),&
-               nest%intermediate_grid%smois,&
-               cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
-               cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
-               cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
-               nest%smois,&
-               ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
-               ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
-               ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
-               nest_config_flags%shw, nest%imask_nostag,&
-               .FALSE.,.FALSE.,&
-               nest%i_parent_start, nest%j_parent_start,&
-               nest%parent_grid_ratio, nest%parent_grid_ratio,&
-               nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater,&
-               0.01, 0.99 &
-            )
-            WRITE(message,FMT='(A)') '*** SMOIS ***'
-            CALL wrf_debug ( 0 , message )
-         END IF
-         IF (nest_config_flags%interp_soil_fine_lu > 2) THEN
-            CALL interp_mask_field_fine_lu(&
-               (SIZE(nest%intermediate_grid%tsk,1)*SIZE(nest%intermediate_grid%tsk,2) .GT. 1),&
-               nest%intermediate_grid%tsk,&
-               cids, cide, 1, 1, cjds, cjde,&
-               cims, cime, 1, 1, cjms, cjme,&
-               cips, cipe, 1, 1, cjps, cjpe,&
-               nest%tsk,&
-               ids,  ide, 1, 1,  jds,  jde,&
-               ims,  ime, 1, 1,  jms,  jme,&
-               ips,  ipe, 1, 1,  jps,  jpe,&
-               nest_config_flags%shw, nest%imask_nostag,&
-               .FALSE.,.FALSE.,&
-               nest%i_parent_start, nest%j_parent_start,&
-               nest%parent_grid_ratio, nest%parent_grid_ratio,&
-               nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater,&
-               274.0, 350.0 &
-            )
-            WRITE(message,FMT='(A)') '*** TSK ***'
-            CALL wrf_debug ( 0 , message )
+         WRITE(message,FMT='(A)') '*** SMOIS ***'
+         CALL wrf_debug ( 0 , message )
+         CALL interp_mask_field_fine_lu(&
+            (SIZE(nest%intermediate_grid%smois,1)*SIZE(nest%intermediate_grid%smois,3) .GT. 1),&
+            nest%intermediate_grid%smois,&
+            cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
+            cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
+            cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+            nest%smois,&
+            ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
+            ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
+            ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater,&
+            0.01, 0.99 &
+         )
+         WRITE(message,FMT='(A)') '*** SMOIS DONE ***'
+         CALL wrf_debug ( 0 , message )
 
-            CALL interp_mask_field_fine_lu(&
-               (SIZE(nest%intermediate_grid%smcrel,1)*SIZE(nest%intermediate_grid%smcrel,3) .GT. 1),&
-               nest%intermediate_grid%smcrel,&
-               cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
-               cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
-               cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
-               nest%smcrel,&
-               ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
-               ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
-               ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
-               nest_config_flags%shw, nest%imask_nostag,&
-               .FALSE.,.FALSE.,&
-               nest%i_parent_start, nest%j_parent_start,&
-               nest%parent_grid_ratio, nest%parent_grid_ratio,&
-               nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater,&
-               0.01, 1.0 &
-            )
+         WRITE(message,FMT='(A)') '*** TSK ***'
+         CALL wrf_debug ( 0 , message )
+         CALL interp_mask_field_fine_lu(&
+            (SIZE(nest%intermediate_grid%tsk,1)*SIZE(nest%intermediate_grid%tsk,2) .GT. 1),&
+            nest%intermediate_grid%tsk,&
+            cids, cide, 1, 1, cjds, cjde,&
+            cims, cime, 1, 1, cjms, cjme,&
+            cips, cipe, 1, 1, cjps, cjpe,&
+            nest%tsk,&
+            ids,  ide, 1, 1,  jds,  jde,&
+            ims,  ime, 1, 1,  jms,  jme,&
+            ips,  ipe, 1, 1,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater,&
+            274.0, 350.0 &
+         )
+         WRITE(message,FMT='(A)') '*** TSK DONE ***'
+         CALL wrf_debug ( 0 , message )
 
-            WRITE(message,FMT='(A)') '*** SMCREL ***'
-            CALL wrf_debug ( 0 , message )
+         WRITE(message,FMT='(A)') '*** SMCREL ***'
+         CALL wrf_debug ( 0 , message )
+         CALL interp_mask_field_fine_lu(&
+            (SIZE(nest%intermediate_grid%smcrel,1)*SIZE(nest%intermediate_grid%smcrel,3) .GT. 1),&
+            nest%intermediate_grid%smcrel,&
+            cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
+            cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
+            cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+            nest%smcrel,&
+            ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
+            ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
+            ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater,&
+            0.01, 1.0 &
+         )
+         WRITE(message,FMT='(A)') '*** SMCREL DONE ***'
+         CALL wrf_debug ( 0 , message )
 
-            CALL interp_mask_field_fine_lu(&
-               (SIZE(nest%intermediate_grid%sh2o,1)*SIZE(nest%intermediate_grid%sh2o,3) .GT. 1),&
-               nest%intermediate_grid%sh2o,&
-               cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
-               cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
-               cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
-               nest%sh2o,&
-               ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
-               ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
-               ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
-               nest_config_flags%shw, nest%imask_nostag,&
-               .FALSE.,.FALSE.,&
-               nest%i_parent_start, nest%j_parent_start,&
-               nest%parent_grid_ratio, nest%parent_grid_ratio,&
-               nest%intermediate_grid%lu_index, nest%lu_index,&
-               nest%intermediate_grid%iswater, nest%iswater,&
-               0.01, 0.99 &
-            )
-            WRITE(message,FMT='(A)') '*** SH2O ***'
-            CALL wrf_debug ( 0 , message )
-         END IF
+         WRITE(message,FMT='(A)') '*** SH2O ***'
+         CALL wrf_debug ( 0 , message )
+         CALL interp_mask_field_fine_lu(&
+            (SIZE(nest%intermediate_grid%sh2o,1)*SIZE(nest%intermediate_grid%sh2o,3) .GT. 1),&
+            nest%intermediate_grid%sh2o,&
+            cids, cide, 1, config_flags%num_soil_layers, cjds, cjde,&
+            cims, cime, 1, config_flags%num_soil_layers, cjms, cjme,&
+            cips, cipe, 1, config_flags%num_soil_layers, cjps, cjpe,&
+            nest%sh2o,&
+            ids,  ide, 1, config_flags%num_soil_layers,  jds,  jde,&
+            ims,  ime, 1, config_flags%num_soil_layers,  jms,  jme,&
+            ips,  ipe, 1, config_flags%num_soil_layers,  jps,  jpe,&
+            nest_config_flags%shw, nest%imask_nostag,&
+            .FALSE.,.FALSE.,&
+            nest%i_parent_start, nest%j_parent_start,&
+            nest%parent_grid_ratio, nest%parent_grid_ratio,&
+            nest%intermediate_grid%lu_index, nest%lu_index,&
+            nest%intermediate_grid%iswater, nest%iswater,&
+            0.01, 0.99 &
+         )
+         WRITE(message,FMT='(A)') '*** SH2O DONE ***'
+         CALL wrf_debug ( 0 , message )
+
          WRITE(message,FMT='(A)') '*** End of interp_soil_fine_lu'
          CALL wrf_debug ( 0 , message )
      ENDIF
