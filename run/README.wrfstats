@@ -1,0 +1,85 @@
+# README
+
+**WRFstats** allows to output time-averaged quantities, and 2nd and 3rd order products of quantities to be able to compute variances, and covariances in post-processing.
+It is based on "WRFlux" available at: [https://github.com/matzegoebel/WRFlux](https://github.com/matzegoebel/WRFlux) which is a fork of WRF
+
+## Usage
+
+### Test
+
+The statistics computation have been tested only in one case. The tslist (timeseries) option have been used as a comparison. It is advised to realize your own comparison with timeseries before using this feature.
+
+### Namelist options
+
+The online calculations can be controlled in the namelist file or the registry file `Registry/registry.wrfstats`. The calculations do not affect the model evolution.
+
+The namelist variable **`output_stats`** is added. It can take the following values :
+- 0 (default): no statistics is computed
+- 1: return only 1st order statistics (mean)
+- 2: return 1st and 2nd order statistics (mean, non-centered variances, non-centered covariances)
+- 3 (or more): return 1st, 2nd, and 3rd order statistics
+
+All variables are output to the auxiliary output stream `auxhist24`. The output interval can be set with the namelist variables `auxhist24_interval_m` and `auxhist24_interval_s`. The averaging period is equal to the output interval
+
+### Time-averaged variables
+
+The averaged variables can be found in `Registry/registry.wrfstats`, and the calculation is found in `dyn_em/module_statistics.F`. To add new variables, just add them in `Registry/registry.wrfstats`, and add their calculation in `dyn_em/module_statistics.F`
+
+### Post-processing
+
+Variances and covariances and higher-order statistics can be computed in post-processing as 
+```
+    <u'^2> = u2_avg - u_avg*u_avg
+    <u'v'> = uv_avg - u_avg*v_avg
+    <u'v'w'> = uvw_avg - u_avg*vw_avg - v_avg*uw_avg - w_avg*uv_avg + 2*u_avg*v_avg*w_avg 
+```
+
+## Implementation
+
+### Compute the average
+
+The calculation of time-average values is basic :
+$
+<x>_n = \sum_{i=0}^{i=n}(x_i) / n
+$
+Then :
+$
+<x>_0 = 0.
+<x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)
+$
+
+It is computed in `dyn_em/module_statistics.F`. All the variables are averaged in the cell centers as in the timeseries feature. Velocities are interpolated before being averaged. This is mandatory to compute covariances. 
+
+The calculation of the water vapor density $\rho_d$ is based on <cite>Skamarock et al. (2019)</cite>, Equation 2.16. Currently, the only averaged mixing ratio is the water vapor. The TKE_AVG variable is the time-averaged of either the TKE_PBL (from MYJ PBL model for example) or the TKE variable (subgrid TKE from TKE1.5 model). For some variables (e.g. pressure, temperature), the perturbation is averaged rather than the total quantity 
+
+### List of modified files
+
+The following files have been modified:
+- Registry/registry.em_shared_collection
+- Registry/registry.wrfstats
+- dyn_em/Makefile
+- dyn_em/depend.dyn_em
+- dyn_em/module_statistics.F
+- dyn_em/solve_em.F
+- dyn_em/start_em.F
+- main/depend.common
+- phys/noahmp
+- run/README.namelist
+- share/mediation_integrate.F
+- share/module_check_a_mundo.F
+- wrftladj/depend.wrftladj
+- wrftladj/solve_em_ad.F
+- wrftladj/solve_em_tl.F
+
+## Caveats and limitations
+
+* WRFlux can increase the runtime by about 25 %. No test have been realized for WRFstats but the writing time might be highly impacted
+* The tool might not work with adaptive timestepping
+* It has been tested only in one configuration
+
+## Acknowledgments
+
+Thanks to Matthias Göbel who provided the code used as a starting point for WRFstats, and WRF developers and support for their amazing work.
+---
+Mathieu Landreau
+

@@ -10,11 +10,10 @@ CONTAINS
 
 !-------------------------------------------------------------------------------
   !The calculation of time-average values is basic :
-  ! <x>_n = sum_{i=0}^{i=n}(x_i) / n
+  ! <x>_n = \sum_{i=0}^{i=n}(x_i) / n
   ! Then :
   ! <x>_0 = 0.                                      -> computed in zero_statistics
   ! <x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)         -> computed in upd_statistics
-  !There might exist better methods
 
   SUBROUTINE zero_statistics(grid, output_stats, its, ite, jts, jte, kts, kte)
 
@@ -71,7 +70,6 @@ CONTAINS
           grid%ptv2_avg(i,k,j) = 0.
           grid%q2_avg(i,k,j) = 0.
           grid%qv2_avg(i,k,j) = 0.
-          !grid%p2_avg(i,k,j) = 0.
           grid%zp2_avg(i,k,j) = 0.
 
           grid%uv_avg(i,k,j) = 0.
@@ -97,8 +95,6 @@ CONTAINS
           grid%up_avg(i,k,j) = 0.
           grid%vp_avg(i,k,j) = 0.
           grid%wp_avg(i,k,j) = 0.
-
-          !grid%qvpt_avg(i,k,j) = 0.
         END DO
         END DO
         END DO
@@ -106,11 +102,16 @@ CONTAINS
           DO j=jts,jte
           DO k=kts,kte
           DO i=its,ite
-            grid%u3_avg(i,k,j) = 0.
-            grid%v3_avg(i,k,j) = 0.
-            grid%w3_avg(i,k,j) = 0.
-            !grid%q3_avg(i,k,j) = 0.
-            !grid%ptv3_avg(i,k,j) = 0.
+            grid%uuu_avg(i,k,j) = 0.
+            grid%vvv_avg(i,k,j) = 0.
+            grid%www_avg(i,k,j) = 0.
+            grid%uuv_avg(i,k,j) = 0.
+            grid%uvv_avg(i,k,j) = 0.
+            grid%uuw_avg(i,k,j) = 0.
+            grid%uww_avg(i,k,j) = 0.
+            grid%vvw_avg(i,k,j) = 0.
+            grid%vww_avg(i,k,j) = 0.
+            grid%uvw_avg(i,k,j) = 0.
           END DO
           END DO
           END DO
@@ -224,12 +225,12 @@ CONTAINS
 #else
         u = grid%u(i,k,j)
         v = grid%v(i,k,j)
-        pt = grid%pt(i,k,j) !I don't know if it is dry or moist, I assume dry
+        pt = grid%pt(i,k,j)
         ptv = (pt+T0) * (1.+R_v/R_d*qv) - T0
 #endif
         pb = grid%pb(i,k,j)
         t = (pt+T0) * (p0/(p+pb))**(-rcp)
-        tv = t * (1.+R_v/R_d*qv)
+        tv = (ptv+T0) * (p0/(p+pb))**(-rcp)
         rhod = (p+pb)/(R_d*tv)
         rhov = rhod*qv
         rho = rhod*(1.+q)
@@ -262,7 +263,6 @@ CONTAINS
           grid%ptv2_avg(i,k,j) = (local_count*grid%ptv2_avg(i,k,j) +  ptv*ptv ) * one_over_count_p1
           grid%q2_avg(i,k,j)   = (local_count*grid%q2_avg(i,k,j)   +  q*q )     * one_over_count_p1
           grid%qv2_avg(i,k,j)  = (local_count*grid%qv2_avg(i,k,j)  +  qv*qv )   * one_over_count_p1
-          !grid%p2_avg(i,k,j)   = (local_count*grid%p2_avg(i,k,j)   +  p*p )     * one_over_count_p1
           grid%zp2_avg(i,k,j)   = (local_count*grid%zp2_avg(i,k,j)   +  zp*zp )     * one_over_count_p1
 
           grid%uv_avg(i,k,j)   = (local_count*grid%uv_avg(i,k,j)   +  u*v )     * one_over_count_p1
@@ -290,11 +290,16 @@ CONTAINS
           grid%wp_avg(i,k,j)   = (local_count*grid%wp_avg(i,k,j)   +  w*p )     * one_over_count_p1
 
           if (output_stats > 2) then
-            grid%u3_avg(i,k,j) = (local_count*grid%u3_avg(i,k,j)  +  u*u*u ) * one_over_count_p1
-            grid%v3_avg(i,k,j) = (local_count*grid%v3_avg(i,k,j)  +  v*v*v ) * one_over_count_p1
-            grid%w3_avg(i,k,j) = (local_count*grid%w3_avg(i,k,j)  +  w*w*w ) * one_over_count_p1
-            !grid%q3_avg(i,k,j) = (local_count*grid%q3_avg(i,k,j)  +  q*q*q ) * one_over_count_p1
-            !grid%ptv3_avg(i,k,j) = (local_count*grid%ptv3_avg(i,k,j)  +  ptv*ptv*ptv ) * one_over_count_p1
+            grid%uuu_avg(i,k,j) = (local_count*grid%uuu_avg(i,k,j)  +  u*u*u ) * one_over_count_p1
+            grid%vvv_avg(i,k,j) = (local_count*grid%vvv_avg(i,k,j)  +  v*v*v ) * one_over_count_p1
+            grid%www_avg(i,k,j) = (local_count*grid%www_avg(i,k,j)  +  w*w*w ) * one_over_count_p1
+            grid%uuv_avg(i,k,j) = (local_count*grid%uuv_avg(i,k,j)  +  u*u*v ) * one_over_count_p1
+            grid%uvv_avg(i,k,j) = (local_count*grid%uvv_avg(i,k,j)  +  u*v*v ) * one_over_count_p1
+            grid%uuw_avg(i,k,j) = (local_count*grid%uuw_avg(i,k,j)  +  u*u*w ) * one_over_count_p1
+            grid%uww_avg(i,k,j) = (local_count*grid%uww_avg(i,k,j)  +  u*w*w ) * one_over_count_p1
+            grid%vvw_avg(i,k,j) = (local_count*grid%vvw_avg(i,k,j)  +  v*v*w ) * one_over_count_p1
+            grid%vww_avg(i,k,j) = (local_count*grid%vww_avg(i,k,j)  +  v*w*w ) * one_over_count_p1
+            grid%uvw_avg(i,k,j) = (local_count*grid%uvw_avg(i,k,j)  +  u*v*w ) * one_over_count_p1
           endif
         endif
       ENDDO
