@@ -5,7 +5,7 @@ This is a fork of the "WRFlux" available at: [https://github.com/matzegoebel/WRF
 **WRFstats** allows to output time-averaged quantities, and 2nd and 3rd order products of quantities to be able to compute variances, and covariances in post-processing. Other small modifications have been made such as :
 - A bug fix in tslist
 - A feature to allow the time series maximum height to be different in each domain
-- A feature ('fine_LU') that initialize soil properties by interpolating from parent domain (in case a nested domain starts later than its parent)
+- A feature ('fine\_LU') that initialize soil properties by interpolating from parent domain (in case a nested domain starts later than its parent)
 - A feature to chose the default soiltype that is used in land cells where the soil category is not defined.
 - A bug fix (probably not the best way) [https://github.com/wrf-model/WRF/issues/1947](https://github.com/wrf-model/WRF/issues/1947)
 
@@ -35,8 +35,8 @@ The averaged variables can be found in `Registry/registry.wrfstats`, and the cal
 ### Post-processing
 
 Variances and covariances can be computed in post-processing as 
-var(u) = u2_avg - u_avg*u_avg
-covar(u, v) = uv_avg - u_avg*v_avg
+var(u) = u2_avg - u_avg\*u_avg
+covar(u, v) = uv_avg - u_avg\*v_avg
 
 ## Installation
 
@@ -47,23 +47,19 @@ This repository contains a complete, standalone version of WRF. Since it is a fo
 ### Compute the average
 
 The calculation of time-average values is basic :
-$
-<x>_n = \sum_{i=0}^{i=n}(x_i) / n
-$
+![](https://latex.codecogs.com/svg.latex?<x>_n = \sum_{i=0}^{i=n}(x_i) / n)
 Then :
-$
-<x>_0 = 0.
-<x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1)
-$
+![](https://latex.codecogs.com/svg.latex?<x>_0 = 0)
+![](https://latex.codecogs.com/svg.latex?<x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1))
 
 It is computed in `dyn_em/module_statistics.F`. All the variables are averaged in the cell centers as in the timeseries feature. Velocities are interpolated before being averaged. This is mandatory to compute covariances. 
 
-The calculation of the water vapor density $\rho_d$ is based on <cite>Skamarock et al. (2019)</cite>, Equation 2.16. The only averaged mixing ratio is the water vapor. The TKE_AVG variable is the time-averaged of either the TKE_PBL (from MYJ PBL model for example) or the TKE variable (subgrid TKE from TKE1.5 model). For some variables (e.g. pressure, temperature), the perturbation is averaged rather than the total quantity 
+The calculation of the water vapor density $\rho_d$ is based on <cite>Skamarock et al. (2019)</cite>, Equation 2.16. The only averaged mixing ratio is the water vapor. The TKE\_AVG variable is the time-averaged of either the TKE\_PBL (from MYJ PBL model for example) or the TKE variable (subgrid TKE from TKE1.5 model). For some variables (e.g. pressure, temperature), the perturbation is averaged rather than the total quantity 
 
 ### List of modified files
 
 The following WRF source code files have been modified:
-- README_WRFlux.md (just changed the name)
+- README\_WRFlux.md (just changed the name)
 - Registry/Registry.EM_COMMON (add TKE to the history)
 - Registry/registry.em_shared_collection
 - Registry/registry.wrfstats (new)
