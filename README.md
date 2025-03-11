@@ -35,7 +35,9 @@ The averaged variables can be found in `Registry/registry.wrfstats`, and the cal
 ### Post-processing
 
 Variances and covariances can be computed in post-processing as 
+
 var(u) = u2_avg - u_avg\*u_avg
+
 covar(u, v) = uv_avg - u_avg\*v_avg
 
 ## Installation
@@ -47,10 +49,10 @@ This repository contains a complete, standalone version of WRF. Since it is a fo
 ### Compute the average
 
 The calculation of time-average values is basic :
-![](https://latex.codecogs.com/svg.latex?<x>_n = \sum_{i=0}^{i=n}(x_i) / n)
+$<x>_n = \sum_{i=0}^{i=n}(x_i) / n$
 Then :
-![](https://latex.codecogs.com/svg.latex?<x>_0 = 0)
-![](https://latex.codecogs.com/svg.latex?<x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1))
+$<x>_0 = 0$
+$<x>_{n+1} = (n*<x>_n + x_{n+1}) / (n+1))$
 
 It is computed in `dyn_em/module_statistics.F`. All the variables are averaged in the cell centers as in the timeseries feature. Velocities are interpolated before being averaged. This is mandatory to compute covariances. 
 
