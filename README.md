@@ -36,9 +36,9 @@ The averaged variables can be found in `Registry/registry.wrfstats`, and the cal
 
 Variances and covariances can be computed in post-processing as 
 
-var(u) = u2_avg - u_avg\*u_avg
+var(u) = u2\_avg - u\_avg\*u\_avg
 
-covar(u, v) = uv_avg - u_avg\*v_avg
+covar(u, v) = uv\_avg - u\_avg\*v\_avg
 
 ## Installation
 
@@ -56,11 +56,11 @@ Then :
 
 $\overline{x}\_0 = 0$
 
-$\overline{x}\_{n+1} = (n\*\overline{x}\_n + x\_{n+1}) / (n+1))$
+$\overline{x}\_{n+1} = (n\*\overline{x}\_n + x\_{n+1}) / (n+1)$
 
 It is computed in `dyn_em/module_statistics.F`. All the variables are averaged in the cell centers as in the timeseries feature. Velocities are interpolated before being averaged. This is mandatory to compute covariances. 
 
-The calculation of the water vapor density $\rho_d$ is based on <cite>Skamarock et al. (2019)</cite>, Equation 2.16. The only averaged mixing ratio is the water vapor. The TKE\_AVG variable is the time-averaged of either the TKE\_PBL (from MYJ PBL model for example) or the TKE variable (subgrid TKE from TKE1.5 model). For some variables (e.g. pressure, temperature), the perturbation is averaged rather than the total quantity 
+The calculation of the water vapor density $\rho\_d$ is based on <cite>Skamarock et al. (2019)</cite>, Equation 2.16. The only averaged mixing ratio is the water vapor. The TKE\_AVG variable is the time-averaged of either the TKE\_PBL (from MYJ PBL model for example) or the TKE variable (subgrid TKE from TKE1.5 model). For some variables (e.g. pressure, temperature), the perturbation is averaged rather than the total quantity 
 
 ### List of modified files
 
