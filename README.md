@@ -50,13 +50,13 @@ This repository contains a complete, standalone version of WRF. Since it is a fo
 
 The calculation of time-average values is basic:
 
-$\overline{x}_n = \sum_{i=0}^{i=n}(x_i) / n$
+$\overline{x}\_n = \sum_{i=0}^{i=n}(x\_i) / n$
 
 Then :
 
-$\overline{x}_0 = 0$
+$\overline{x}\_0 = 0$
 
-$\overline{x}_{n+1} = (n*\overline{x}_n + x_{n+1}) / (n+1))$
+$\overline{x}\_{n+1} = (n\*\overline{x}\_n + x\_{n+1}) / (n+1))$
 
 It is computed in `dyn_em/module_statistics.F`. All the variables are averaged in the cell centers as in the timeseries feature. Velocities are interpolated before being averaged. This is mandatory to compute covariances. 
 
