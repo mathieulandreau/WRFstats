@@ -1,4 +1,7 @@
-# README
+# WRFstats
+
+This repository contains the simulation code used in the following paper :
+Landreau, Mathieu, Boris Conan, Benjamin Luce, et Isabelle Calmet. 2025. « Observation and LES modeling of an offshore atmospheric undular bore generated during sea-breeze initiation near a peninsula ». https://hal.science/hal-04996636.
 
 This is a fork of the "WRFlux" available at: [https://github.com/matzegoebel/WRFlux](https://github.com/matzegoebel/WRFlux) which is a fork of the "Weather Research and Forecast model (WRF)" available at: [https://github.com/wrf-model/WRF](https://github.com/wrf-model/WRF).
 
@@ -13,7 +16,7 @@ This is a fork of the "WRFlux" available at: [https://github.com/matzegoebel/WRF
 
 ### Branchs
 
-The diverse branches corresponds to the different implementation (stats for statistics), and run is the merge of all branches used for the paper "Observation and modeling of an offshore atmospheric undular bore generated during sea-breeze initiation near a peninsula" (commit 7b8cf696)
+The diverse branches corresponds to the different implementation (stats for statistics), and run is the merge of all branches used for the paper (commit 7b8cf696)
 
 ### Namelist options
 
@@ -66,24 +69,24 @@ The calculation of the water vapor density $\rho\_d$ is based on <cite>Skamarock
 
 The following WRF source code files have been modified:
 - README\_WRFlux.md (just changed the name)
-- Registry/Registry.EM_COMMON (add TKE to the history)
-- Registry/registry.em_shared_collection
+- Registry/Registry.EM\_COMMON (add TKE to the history)
+- Registry/registry.em\_shared\_collection
 - Registry/registry.wrfstats (new)
-- dyn_em/Makefile (add dependency with module_statistics)
-- dyn_em/depend.dyn_em (add dependency with module_statistics)
-- dyn_em/module_initialize_real.F
-- dyn_em/module_statistics.F (new)
-- dyn_em/solve_em.F (stats)
-- dyn_em/start_em.F (stats)
-- main/depend.common (add dependency with module_statistics)
-- share/interp_fcn.F (fine_lu)
-- share/mediation_integrate.F
-- share/module_check_a_mundo.F
-- share/start_domain.F (fine_lu)
-- share/wrf_timeseries.F (fix bug)
+- dyn\_em/Makefile (add dependency with module\_statistics)
+- dyn\_em/depend.dyn\_em (add dependency with module\_statistics)
+- dyn\_em/module\_initialize\_real.F
+- dyn\_em/module\_statistics.F (new)
+- dyn\_em/solve\_em.F (stats)
+- dyn\_em/start\_em.F (stats)
+- main/depend.common (add dependency with module\_statistics)
+- share/interp\_fcn.F (fine\_lu)
+- share/mediation\_integrate.F
+- share/module\_check\_a\_mundo.F
+- share/start\_domain.F (fine\_lu)
+- share/wrf\_timeseries.F (fix bug)
 - wrftladj/depend.wrftladj
-- wrftladj/solve_em_ad.F (stats)
-- wrftladj/solve_em_tl.F (stats)
+- wrftladj/solve\_em\_ad.F (stats)
+- wrftladj/solve\_em\_tl.F (stats)
 
 ## Caveats and limitations
 
